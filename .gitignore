@@ -58,10 +58,9 @@ apresentacao/
 TCC1___Ana_Luiz_e_Pedro.pdf
 TCC2___Ana_Luiz_e_Pedro.pdf
 
-# Configuração local do Claude Code: caminhos absolutos desta máquina e
-# allowlist de permissões por sessão. Os comandos e skills do OpenSpec em
-# .claude/commands/ e .claude/skills/ SÃO versionados; só este arquivo não é.
-.claude/settings.local.json
+# Configurações locais de ferramentas de desenvolvimento, que não fazem
+# parte do projeto.
+.claude/
 
 # Artigos de terceiros lidos como referência (ZeroFalse e os trabalhos que o
 # citam). Ficam fora pelo mesmo motivo dos PDFs de TCC de terceiros acima: são
