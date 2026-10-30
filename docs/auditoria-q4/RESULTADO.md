@@ -1,10 +1,8 @@
-# Auditoria qualitativa da Q4 — resultado (PROVISÓRIO)
+# Auditoria qualitativa da Q4 — resultado
 
-> **Pré-classificação assistida por IA, 2026-09-22, aguardando revisão dos
+> **Pré-classificação assistida por IA, 2026-09-22, revisada caso a caso pelos
 > autores.** Critério em `CRITERIO.md`, registrado antes da amostragem. Planilha
 > caso a caso em `classificacao.csv`; amostra reproduzível por `amostrar.py`.
->
-> ⛔ Não commitar sem pedido explícito do autor.
 
 Amostra: 25 casos da Rodada 3 (braço de filtro, `qwen2.5-coder:7b`), cada um
 lido nos dois prompts — 50 vereditos. Estratos: E-VP 3/3, E-FP 12/12, E-FN 5/16,

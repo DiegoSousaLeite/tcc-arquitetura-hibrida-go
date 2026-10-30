@@ -86,9 +86,9 @@ recorte não traz.
    gabarito. O eixo 1 é julgado antes de consultar o gabarito, mas isso é
    procedimento, não cegamento.
 2. **Pré-classificação**: a primeira passada foi feita com assistência de
-   ferramenta de IA generativa, por decisão dos autores, e está marcada como
-   provisória na planilha até revisão humana. O capítulo precisa dizer isso
-   enquanto a revisão não estiver concluída.
+   ferramenta de IA generativa, por decisão dos autores. Cada uma das 50
+   classificações foi depois revisada pelos autores, que respondem por ela, e
+   está marcada como revisada na planilha.
 3. Classificador único, sem medida de concordância entre avaliadores.
 
 ## 6. Alterações posteriores ao registro
