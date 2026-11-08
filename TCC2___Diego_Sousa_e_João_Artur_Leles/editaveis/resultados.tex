@@ -385,7 +385,7 @@ Reunidas as três análises, a resposta à Q3 é parcial. O desempenho do modelo
 \section{Q4: O Raciocínio do Modelo}
 \label{sec:q4}
 
-A Q4 pergunta de que forma a combinação de regras teóricas de segurança estruturadas em \textit{prompts} influencia a capacidade de raciocínio do modelo, e a metodologia associa a ela a auditoria qualitativa da justificativa que o modelo escreve antes do veredito: verificar se a decisão veio de uma fundamentação correta ou de alucinação. A auditoria não faz parte de nenhuma rodada de execução: foi conduzida depois, sobre os vereditos já gravados da Rodada 3, sem nova chamada ao modelo, porque o contexto entregue a ele em cada caso (o alerta do Semgrep, o trecho de código e o \textit{prompt}) pode ser remontado exatamente a partir dos resultados gravados da \textit{pipeline} (Seção~\ref{sec:arquitetura}).
+A Q4 pergunta de que forma a combinação de regras teóricas de segurança estruturadas em \textit{prompts} influencia a capacidade de raciocínio do modelo, e a metodologia associa a ela a auditoria qualitativa da justificativa que o modelo escreve junto com o veredito: verificar se a decisão veio de uma fundamentação correta ou de alucinação. A auditoria não faz parte de nenhuma rodada de execução: foi conduzida depois, sobre os vereditos já gravados da Rodada 3, sem nova chamada ao modelo, porque o contexto entregue a ele em cada caso (o alerta do Semgrep, o trecho de código e o \textit{prompt}) pode ser remontado exatamente a partir dos resultados gravados da \textit{pipeline} (Seção~\ref{sec:arquitetura}).
 
 \subsection{Protocolo}
 \label{subsec:q4protocolo}
@@ -435,7 +435,7 @@ A leitura qualitativa revelou quatro padrões que as contagens sozinhas não mos
 
 O segundo padrão é a \textbf{reprodução do exemplo da ficha}. Num caso de injeção de argumentos de processo, em que um valor vindo de fora chega aos argumentos de \texttt{exec.Command}, o especialista justifica o descarte com uma frase quase literal da justificativa do exemplo de falso positivo da ficha de CWE-94 (``a entrada externa é apenas dado interpolado, não código''), trocando ``\textit{template}'' por ``comando''. O enriquecimento semântico influencia o raciocínio também na forma negativa: o modelo reproduz o exemplo em vez de aplicá-lo.
 
-O terceiro padrão é o \textbf{raciocínio certo com veredito oposto}: em dois casos de configuração de TLS, o especialista descreve corretamente o código como boa prática e, na mesma resposta, emite ``verdadeiro positivo''. A exigência de raciocínio antes do veredito, adotada na metodologia para estabilizar a resposta, não garante que o veredito decorra do raciocínio.
+O terceiro padrão é o \textbf{raciocínio certo com veredito oposto}: em dois casos de configuração de TLS, o especialista descreve corretamente o código como boa prática e, na mesma resposta, emite ``verdadeiro positivo''. A exigência de uma justificativa junto com o veredito, adotada na metodologia, não garante que o veredito decorra do raciocínio.
 
 O quarto padrão diz respeito ao gabarito, e não ao modelo. Em dois pares de casos da amostra, o modelo recebeu \textbf{exatamente o mesmo recorte}, byte a byte, rotulado vulnerável na versão anterior à correção e seguro na versão corrigida: o \textit{commit} de correção alterou outra função do arquivo, e o alerta aponta para a mesma função nas duas versões. Com temperatura zero e semente fixa, o modelo necessariamente erra um dos dois. É a granularidade do rótulo, discutida na Seção~\ref{subsec:sobra}, vista do lado do componente neural.
 
