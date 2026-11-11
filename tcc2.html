@@ -418,8 +418,8 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <tr><td>4</td><td>qwen2.5-coder:7b</td><td>triagem</td><td>primeira triagem, contexto só com o código</td></tr>
           <tr><td>5</td><td>qwen2.5-coder:7b</td><td>triagem</td><td>pergunta direta sobre o código</td></tr>
           <tr><td>6</td><td>gemma2:9b</td><td>triagem</td><td>troca do modelo</td></tr>
-          <tr><td>7</td><td>os dois locais</td><td>os dois</td><td>fichas por regra · gemma2:9b no filtro</td></tr>
-          <tr><td>Comercial</td><td>gpt-6-luna</td><td>os dois</td><td>sem raciocínio (2 execuções), esforço baixo e alto</td></tr>
+          <tr><td>7</td><td>qwen2.5-coder:7b e gemma2:9b</td><td>filtro e triagem</td><td>testa fichas por regra do Semgrep, em vez de por CWE · primeira vez do gemma2:9b no filtro</td></tr>
+          <tr><td>Comercial</td><td>gpt-6-luna</td><td>filtro e triagem</td><td>sem raciocínio (2 execuções), esforço baixo e alto</td></tr>
           <tr><td>Reexecução</td><td>os das R4 a R6</td><td>triagem</td><td>mesma configuração · R4 e R6 reproduzem, R5 perde a significância</td></tr>
         </table>
         <p class="sub" style="margin-top:0.5em">Nas Rodadas 1 a 6, <b>cada rodada muda uma única variável</b> em relação à anterior.</p>
