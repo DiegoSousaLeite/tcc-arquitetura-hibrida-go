@@ -1,0 +1,494 @@
+/* ==========================================================================
+   Tema base da apresentação
+   Paleta validada (dataviz reference palette, modo claro)
+   ========================================================================== */
+
+:root {
+  --surface: #fcfcfb;
+  --plane: #f9f9f7;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --hairline: #e1e0d9;
+  --border: rgba(11, 11, 11, 0.10);
+
+  --blue: #2a78d6;
+  --blue-deep: #1c5cab;
+  --blue-tint: #eaf2fb;
+  --aqua: #1baf7a;
+  --violet: #4a3aa7;
+  --orange: #eb6834;
+  --orange-tint: #fdeee4;
+  --gray-tint: #f0efec;
+
+  --good: #0ca30c;
+  --good-text: #006300;
+  --good-tint: #e7f4e7;
+  --crit: #d03b3b;
+  --crit-text: #a12c2c;
+  --crit-tint: #fbe9e9;
+  --warn-tint: #fdf3dd;
+}
+
+/* ---------- base ---------- */
+
+.reveal-viewport {
+  background: var(--plane);
+}
+
+.reveal {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 30px;
+  color: var(--ink);
+}
+
+.reveal .slides section {
+  text-align: left;
+  padding: 26px 44px 30px 44px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* O reveal marca o slide visível com .present (display:block, especificidade
+   alta). Reafirmamos o flex nele para poder centralizar o corpo. */
+.reveal .slides section.present {
+  display: flex !important;
+  flex-direction: column;
+}
+
+/* Cabeçalho (kicker + h2) fixo no topo; o conteúdo que vem depois do h2 é
+   centralizado verticalmente no espaço restante, via margens automáticas. */
+.reveal .slides section:not(.capa-slide) > h2 + * { margin-top: auto !important; }
+.reveal .slides section:not(.capa-slide) > *:last-child { margin-bottom: auto !important; }
+
+/* A capa não tem h2: centraliza o bloco inteiro. */
+.reveal .slides section.capa-slide.present { justify-content: center; }
+
+.reveal p,
+.reveal li {
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.reveal strong { color: var(--ink); }
+.reveal em { color: inherit; }
+
+.reveal a { color: var(--blue-deep); text-decoration: none; }
+
+.reveal code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.86em;
+  background: var(--gray-tint);
+  border-radius: 5px;
+  padding: 0.04em 0.32em;
+}
+
+/* ---------- cabeçalho do slide ---------- */
+
+.kicker {
+  font-size: 0.52em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue-deep);
+  margin: 0 0 4px 0;
+}
+
+.reveal h2 {
+  font-size: 1.42em;
+  font-weight: 750;
+  color: var(--ink);
+  margin: 0 0 10px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline);
+  letter-spacing: -0.01em;
+}
+
+.reveal h3 {
+  font-size: 0.9em;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin: 0.5em 0 0.3em 0;
+}
+
+/* ---------- listas ---------- */
+
+.reveal ul { margin: 0.35em 0 0 1em; }
+.reveal ul li { margin-bottom: 0.5em; padding-left: 0.15em; }
+.reveal ul li::marker { color: var(--blue); }
+.reveal li ul { font-size: 0.88em; margin-top: 0.35em; }
+.reveal li ul li { margin-bottom: 0.25em; }
+.reveal li ul li::marker { color: var(--muted); }
+
+.sub { color: var(--ink-2); font-size: 0.82em; }
+
+/* ---------- citações no rodapé do slide ---------- */
+
+.cite {
+  margin-top: 20px;
+  font-size: 0.5em;
+  color: var(--muted);
+  border-top: 1px solid var(--hairline);
+  padding-top: 8px;
+}
+
+/* ---------- rodapé fixo do deck ---------- */
+
+.deck-footer {
+  position: fixed;
+  bottom: 10px;
+  left: 20px;
+  z-index: 30;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.reveal .slide-number {
+  background: transparent;
+  color: var(--muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  right: 14px;
+  bottom: 10px;
+}
+
+.reveal-viewport.capa .deck-footer,
+body.capa .deck-footer,
+.reveal-viewport.capa .slide-number,
+body.capa .slide-number {
+  display: none !important;
+}
+
+/* logo da UnB — fixo em todos os slides, inclusive capa/encerramento */
+.unb-logo {
+  position: fixed;
+  top: 14px;
+  right: 20px;
+  height: 88px;
+  width: auto;
+  z-index: 30;
+  pointer-events: none;
+}
+
+/* ---------- capa ---------- */
+
+.capa-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.capa-slide .inst {
+  font-size: 0.6em;
+  color: var(--ink-2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 26px;
+}
+
+.capa-slide h1 {
+  font-size: 1.62em;
+  font-weight: 800;
+  line-height: 1.22;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  margin: 0 0 10px 0;
+}
+
+.capa-slide .subtitulo {
+  font-size: 0.78em;
+  color: var(--blue-deep);
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+
+.capa-slide .pessoas { font-size: 0.62em; color: var(--ink-2); line-height: 1.75; }
+.capa-slide .pessoas b { color: var(--ink); font-weight: 650; }
+
+/* ---------- agenda ---------- */
+
+.agenda { list-style: none; margin: 0.6em 0 0 0 !important; padding: 0; }
+.agenda li {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 13px 6px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 1.02em;
+  font-weight: 600;
+}
+.agenda .num {
+  font-size: 0.72em;
+  font-weight: 750;
+  color: var(--blue);
+  min-width: 1.4em;
+}
+.agenda .desc { font-size: 0.62em; font-weight: 400; color: var(--muted); margin-left: auto; text-align: right; }
+
+/* ---------- blocos utilitários ---------- */
+
+.cols { display: flex; gap: 26px; align-items: stretch; }
+.cols > * { flex: 1; min-width: 0; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+.card h3 { margin-top: 0; }
+
+.hl {
+  background: var(--blue-tint);
+  border-left: 5px solid var(--blue);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 20px;
+  font-size: 0.82em;
+  margin: 0.5em 0;
+}
+
+.hl-warn {
+  background: var(--warn-tint);
+  border-left-color: var(--orange);
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.56em;
+  font-weight: 650;
+  color: var(--blue-deep);
+  background: var(--blue-tint);
+  border-radius: 999px;
+  padding: 3px 14px;
+  margin: 0 6px 6px 0;
+}
+
+/* ---------- perguntas de pesquisa ---------- */
+
+.qlist { list-style: none; margin: 0.45em 0 0 0 !important; padding: 0; }
+.qlist li {
+  display: flex;
+  gap: 18px;
+  align-items: baseline;
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 0.82em;
+  margin: 0;
+}
+.qlist .q {
+  flex: 0 0 auto;
+  font-weight: 800;
+  color: var(--blue-deep);
+  background: var(--blue-tint);
+  border-radius: 8px;
+  padding: 2px 12px;
+  font-size: 0.9em;
+}
+/* o wrapper agrupa TODO o texto num único item flex — evita que cada
+   trecho <b>/<em> vire um item separado e se espalhe pela linha */
+.qlist .qtext { flex: 1; line-height: 1.4; }
+
+/* ---------- bullets-título (frase curta + gloss discreto) ---------- */
+
+.reveal ul.tight { margin: 0.5em 0 0 1em; }
+.reveal ul.tight > li { margin-bottom: 0.72em; line-height: 1.35; }
+.reveal ul.tight > li b { font-weight: 700; }
+.reveal ul.tight .gloss { color: var(--ink-2); font-size: 0.82em; font-weight: 400; }
+.reveal ul.tight .src { color: var(--muted); font-size: 0.8em; font-weight: 400; }
+
+/* ---------- legenda de siglas ---------- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-size: 0.56em;
+  color: var(--ink-2);
+  margin-top: 0.7em;
+  padding-top: 8px;
+  border-top: 1px solid var(--hairline);
+}
+.legend span b { color: var(--blue-deep); font-weight: 750; }
+
+/* ---------- diagramas de fluxo (HTML/CSS) ---------- */
+
+.flow { display: flex; align-items: center; gap: 8px; margin: 0.55em 0; }
+
+/* coluna de entradas empilhadas dentro de um fluxo horizontal:
+   os boxes não devem crescer (senão o flex:1 herdado os estica) */
+.flow .col-io { flex: 0 0 19%; display: flex; flex-direction: column; gap: 8px; }
+.flow .col-io > .step { flex: 0 0 auto; min-height: 52px; }
+
+.flow .step {
+  flex: 1;
+  background: var(--blue-tint);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 0.58em;
+  line-height: 1.3;
+  min-height: 62px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.flow .step b { display: block; font-size: 1.02em; }
+.flow .step .mini { color: var(--ink-2); font-size: 0.86em; margin-top: 2px; }
+
+.flow .step.io   { background: var(--gray-tint); }
+.flow .step.dec  { background: var(--orange-tint); }
+.flow .step.out  { background: var(--good-tint); }
+.flow .step.src  { background: var(--orange-tint); }
+.flow .step.sink { background: var(--crit-tint); }
+.flow .step.san  { background: var(--good-tint); }
+
+.flow .arr {
+  color: var(--muted);
+  font-size: 0.72em;
+  flex: 0 0 auto;
+}
+
+.flow-label {
+  font-size: 0.56em;
+  font-weight: 700;
+  color: var(--ink-2);
+  min-width: 96px;
+  flex: 0 0 auto;
+}
+
+.varr {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.6em;
+  line-height: 1.1;
+  margin: 2px 0;
+}
+
+/* ---------- pilhas de prompt ---------- */
+
+.stack { display: flex; flex-direction: column; gap: 7px; }
+.stack .layer {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-size: 0.6em;
+  background: var(--gray-tint);
+  text-align: center;
+}
+.stack .layer.plus { background: var(--blue-tint); border-left: 4px solid var(--blue); text-align: left; }
+.stack-title { font-size: 0.66em; font-weight: 750; margin-bottom: 8px; text-align: center; }
+
+/* ---------- tabelas ---------- */
+
+.reveal table { border-collapse: collapse; margin: 0.5em 0; width: 100%; }
+.reveal table th,
+.reveal table td {
+  font-size: 0.62em;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+  vertical-align: middle;
+}
+.reveal table th {
+  color: var(--ink-2);
+  font-weight: 700;
+  border-bottom: 2px solid var(--hairline);
+}
+.reveal table td.num { text-align: center; font-variant-numeric: tabular-nums; }
+
+/* matriz 2x2 */
+.matrix { width: auto; margin: 0.4em auto; }
+.matrix th { text-align: center; border-bottom: 1px solid var(--hairline); }
+.matrix td {
+  text-align: center;
+  border: 2px solid var(--surface);
+  border-radius: 8px;
+  min-width: 148px;
+  padding: 12px 14px;
+  line-height: 1.3;
+}
+.matrix td b { font-size: 1.05em; }
+.matrix td .mini { display: block; font-size: 0.82em; color: var(--ink-2); }
+.matrix td.ok  { background: var(--good-tint); }
+.matrix td.ok b { color: var(--good-text); }
+.matrix td.bad { background: var(--crit-tint); }
+.matrix td.bad b { color: var(--crit-text); }
+.matrix .rowhead { font-weight: 700; color: var(--ink-2); background: transparent; text-align: right; }
+
+/* cronograma */
+.crono td, .crono th { text-align: center; padding: 6px 10px; font-size: 0.56em; }
+.crono td:first-child, .crono th:first-child { text-align: left; }
+.crono .x { color: var(--blue); font-weight: 800; }
+
+/* ---------- stat tiles ---------- */
+
+.stats { display: flex; gap: 22px; margin: 0.5em 0; }
+.stat {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.stat .valor { font-size: 1.5em; font-weight: 800; letter-spacing: -0.02em; }
+.stat .rotulo { font-size: 0.56em; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+.stat.ruim .valor { color: var(--crit-text); }
+.stat.bom .valor { color: var(--good-text); }
+
+/* ---------- fórmulas ---------- */
+
+.formula-row td .katex { font-size: 1.05em; }
+.katex { font-size: 1em; }
+
+/* ---------- código / verbatim ---------- */
+
+.term {
+  background: #1e1e1c;
+  color: #e8e6dd;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.52em;
+  line-height: 1.55;
+  border-radius: 10px;
+  padding: 16px 20px;
+  white-space: pre-wrap;
+  margin: 0.4em 0;
+}
+.term .ok { color: #7ddc7d; }
+.term .err { color: #f29a9a; }
+.term .dim { color: #9a988f; }
+
+/* ---------- badge de backup ---------- */
+
+.backup-badge {
+  position: absolute;
+  top: 22px;
+  right: 220px;
+  font-size: 0.5em;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 3px 14px;
+}
+
+/* ---------- referências ---------- */
+
+.refs { font-size: 0.56em; line-height: 1.55; columns: 2; column-gap: 40px; margin-top: 0.8em; }
+.refs p { margin: 0 0 0.75em 0; break-inside: avoid; color: var(--ink-2); }
+.refs b { color: var(--ink); font-weight: 650; }
+
+/* ---------- impressão / PDF ---------- */
+
+@media print {
+  .deck-footer { position: absolute; }
+  .unb-logo { position: absolute; }
+}

@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triagem de Falsos Positivos de SAST com LLMs</title>
+  <link rel="stylesheet" href="vendor/reveal/reset.css">
+  <link rel="stylesheet" href="vendor/reveal/reveal.css">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="css/tema.css">
+  <link rel="stylesheet" href="css/tcc2.css?v=20261110f">
+</head>
+<body>
+  <div class="reveal">
+    <div class="deck-footer">Triagem de Falsos Positivos de SAST com LLMs · UnB</div>
+    <img class="unb-logo" src="logo.png" alt="Universidade de Brasília">
+    <div class="slides">
+
+      <!-- ============ 1. CAPA ============ -->
+      <section data-state="capa" class="capa-slide">
+        <div class="capa-inner">
+          <div class="inst">Universidade de Brasília · Engenharia de Software</div>
+          <h1>Triagem de Falsos Positivos de SAST com LLMs em Ecossistemas Cloud-Native</h1>
+          <div class="subtitulo">Um Estudo em Go</div>
+          <div class="pessoas">
+            <b>Diego Sousa Leite</b> &nbsp;·&nbsp; <b>João Artur Leles Ferreira Pinheiro</b><br>
+            Orientadora: Profa. Dra. Elaine Venson<br>
+            Banca: Prof. Dr. André Barros de Sales &nbsp;·&nbsp; Prof. Dr. Glauco Vitor Pedrosa<br>
+            Trabalho de Conclusão de Curso — novembro de 2026
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 2. AGENDA ============ -->
+      <section>
+        <p class="kicker">Apresentação</p>
+        <h2>Agenda</h2>
+        <ol class="agenda">
+          <li><span class="num">1</span> Introdução <span class="desc">problema · questões de pesquisa · objetivo</span></li>
+          <li><span class="num">2</span> Referencial Teórico <span class="desc">SAST · LLMs · arquitetura híbrida · trabalhos relacionados</span></li>
+          <li><span class="num">3</span> Metodologia <span class="desc">desenho · esteira · <em>prompts</em> · base · modos · métricas</span></li>
+          <li><span class="num">4</span> Resultados <span class="desc">rodadas · questão geral · Q1 a Q4 · modelos · teto de detecção · discussão</span></li>
+          <li><span class="num">5</span> Considerações Finais <span class="desc">respostas · dois limites · limitações · contribuições · trabalhos futuros</span></li>
+        </ol>
+      </section>
+
+      <!-- ============ 3. CONTEXTO E PROBLEMA ============ -->
+      <section>
+        <p class="kicker">Introdução</p>
+        <h2>Contexto e problema</h2>
+        <ul class="tight">
+          <li><b>SAST é a defesa padrão da indústria</b> <span class="gloss">— analisa o código sem executá-lo, como o Semgrep</span></li>
+          <li><b>Mas alarma demais</b> <span class="gloss">— o excesso de falsos positivos gera fadiga de alertas e leva ao abandono da ferramenta</span> <span class="src">(Johnson et al., 2013)</span></li>
+          <li><b>A IA generativa aumenta o volume de código a revisar</b> <span class="gloss">— e reproduz trechos vulneráveis</span> <span class="src">(Pearce et al., 2022)</span></li>
+          <li><b>Go é pilar do <em>cloud-native</em></b> <span class="gloss">— com ferramental de análise menos maduro e concorrência difícil de analisar</span> <span class="src">(CNCF, 2026; Tu et al., 2019)</span></li>
+        </ul>
+        <div class="hl" style="margin-top:0.8em"><b>Proposta:</b> colocar um LLM <b>depois do analisador</b> para separar os alertas verdadeiros dos falsos <span class="sub">— uma arquitetura híbrida simbólico-neural</span></div>
+      </section>
+
+      <!-- ============ 4. QUESTÕES DE PESQUISA ============ -->
+      <section>
+        <p class="kicker">Introdução</p>
+        <h2>Questões de pesquisa e objetivo</h2>
+        <div class="hl"><b>Questão geral:</b> como auxiliar o desenvolvedor na avaliação do resultado da análise estática de forma a <b>reduzir a fadiga de alertas</b>?</div>
+        <ul class="qlist">
+          <li><span class="q">Q1</span><span class="qtext">Qual o impacto do <b>enriquecimento semântico</b> na precisão do LLM ao classificar alertas?</span></li>
+          <li><span class="q">Q2</span><span class="qtext">Em que proporção a arquitetura <b>reduz falsos positivos sem introduzir falsos negativos</b>?</span></li>
+          <li><span class="q">Q3</span><span class="qtext">Como o desempenho se comporta nas fraquezas <b>específicas de Go</b>, como as de concorrência?</span></li>
+          <li><span class="q">Q4</span><span class="qtext">Como as <b>regras de segurança no <em>prompt</em></b> influenciam o raciocínio do modelo?</span></li>
+        </ul>
+        <p class="sub" style="margin-top:0.6em"><b>Objetivo geral:</b> desenvolver e avaliar uma abordagem baseada em LLM para a triagem de falsos positivos de SAST em código Go.</p>
+      </section>
+
+      <!-- ============ 5. REFERENCIAL ============ -->
+      <section>
+        <p class="kicker">Referencial Teórico</p>
+        <h2>Fundamentos e trabalhos relacionados</h2>
+        <div class="grid3">
+          <div class="card">
+            <h3>SAST e Semgrep</h3>
+            <p class="sub">Casa padrões na árvore sintática, <b>sem compilar</b>. Aponta arquivo, linha, regra e CWE de cada achado.</p>
+          </div>
+          <div class="card">
+            <h3>LLMs e <em>prompts</em></h3>
+            <p class="sub">Contexto estruturado guia o modelo. Exemplos por contraste (<em>few-shot</em>) e justificativa junto com o veredito.</p>
+          </div>
+          <div class="card azul">
+            <h3 style="color:var(--blue-deep)">Arquitetura híbrida simbólico-neural</h3>
+            <p class="sub">Analisador e LLM <b>em série</b>. A saída de um, com contexto, vira a entrada do outro, sem treinamento conjunto. É o grau mais simples de IA neuro-simbólica <span style="color:var(--muted)">(Garcez &amp; Lamb, 2023)</span>.</p>
+          </div>
+        </div>
+        <table class="compacta" style="margin-top:0.7em">
+          <tr><th style="width:22%">Trabalho</th><th>O que faz</th><th style="width:32%">Papel aqui</th></tr>
+          <tr><td><b>ZeroFalse</b> <span class="src">(Iranmanesh et al., 2025)</span></td><td>LLM depois do SAST, em Java · F1 de 0,91 a 0,96</td><td>trabalho replicado em Go</td></tr>
+          <tr><td><b>SastBench</b> <span class="src">(Feiglin &amp; Dar, 2026)</span></td><td><em>benchmark</em> de triagem de alertas, várias linguagens</td><td>fonte da base de validação</td></tr>
+          <tr><td><b>IRIS · MEMHINT</b> <span class="src">(2025 · 2026)</span></td><td>LLM <b>antes</b> do analisador, gerando especificações</td><td>direção para trabalho futuro</td></tr>
+          <tr><td><b>Rican</b> <span class="src">(Wang et al., 2026)</span></td><td>eliminação <b>sã</b> de alarmes, por execução</td><td>contraste na discussão</td></tr>
+        </table>
+        <div class="hl hl-warn" style="margin-top:0.5em"><b>Lacuna:</b> <span class="sub">os trabalhos avaliam Java e outras linguagens, e nenhum avalia Go → <b>replicação diferenciada do ZeroFalse</b></span></div>
+      </section>
+
+      <!-- ============ 7. DESENHO EXPERIMENTAL ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Desenho experimental</h2>
+        <p class="sub">Experimento controlado sobre uma base com gabarito. Os cartões em azul são o que variamos de propósito, e os demais ficam fixos. Cada veredito do modelo é comparado automaticamente com o gabarito <span style="color:var(--muted)">(Wohlin et al., 2012)</span>.</p>
+        <div class="grid3" style="margin-top:0.5em">
+          <div class="card"><h3>Linguagem</h3><p class="sub"><b>Go</b>, padrão das arquiteturas <em>cloud-native</em></p></div>
+          <div class="card"><h3>Analisador</h3><p class="sub"><b>Semgrep</b>, conjunto <code>p/default</code> · 84 das 1.074 regras valem para Go</p></div>
+          <div class="card"><h3>Base de validação</h3><p class="sub"><b>SastBench</b> (só Go) + CVEs da <b>OSV.dev</b> · 2.328 casos</p></div>
+          <div class="card azul"><h3>Modelos</h3><p class="sub"><code>qwen2.5-coder:7b</code> (principal) e <code>gemma2:9b</code>, locais · <code>gpt-6-luna</code> por API, sem raciocínio e com esforço baixo e alto</p></div>
+          <div class="card azul"><h3><em>Prompts</em></h3><p class="sub"><em>baseline</em> (só o código) × especialista (com a CWE e a ficha). No filtro, o modelo julga o alerta. Na triagem, julga direto o código.</p></div>
+          <div class="card azul"><h3>Modo de execução</h3><p class="sub"><b>filtro</b> (o sistema real) × <b>triagem</b> (instrumento de medição)</p></div>
+        </div>
+        <p class="sub" style="margin-top:0.6em">Locais com <b>temperatura 0 e semente fixa</b>. O comercial, sem semente, foi executado <b>duas vezes</b> para medir a própria variação.</p>
+      </section>
+
+      <!-- ============ 8. ESTEIRA ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>A esteira em quatro fases</h2>
+        <div class="flow com-auditoria" style="margin-top:0.6em">
+          <div class="step io"><b><em>Commit</em> em Go</b><span class="mini">versão histórica exata</span></div>
+          <div class="arr">▶</div>
+          <div class="step"><b>Fase 1 · Semgrep</b><span class="mini">SARIF: arquivo, linha, regra, mensagem e CWE</span></div>
+          <div class="arr">▶</div>
+          <div class="step"><b>Fase 2 · <em>Middleware</em></b><span class="mini">extrai a função Go que contém o alerta</span></div>
+          <div class="arr">▶</div>
+          <div class="step"><b>Fase 3 · <em>Prompt</em></b><span class="mini"><em>baseline</em> ou especialista com a ficha da CWE</span></div>
+          <div class="arr">▶</div>
+          <div class="step f4"><b>Fase 4 · LLM</b><span class="mini">JSON com justificativa e veredito VP/FP</span></div>
+          <div class="arr">▶</div>
+          <div class="step dec"><b>Decisão</b><span class="mini">bloquear ou aprovar</span></div>
+        </div>
+        <div class="auditoria"><b>Fase 5 · Auditoria</b><span class="mini">só no experimento · cruza cada veredito com o gabarito e grava o CSV das métricas</span></div>
+        <ul class="tight" style="margin-top:0.9em">
+          <li><b>O alerta aponta só uma linha</b> <span class="gloss">— sem o caminho do dado. Por isso a Fase 2 envia ao modelo a função que contém essa linha.</span></li>
+          <li><b>Locais pelo Ollama, comercial pela API em lote</b> <span class="gloss">— mesma interface e mesmos <em>templates</em></span></li>
+        </ul>
+      </section>
+
+      <!-- ============ 9. PROMPTS ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Os dois <em>prompts</em></h2>
+        <div class="cols" style="margin-top:0.4em">
+          <div>
+            <div class="stack-title">Controle — <em>baseline</em></div>
+            <div class="stack">
+              <div class="layer"><b>System:</b> assistente genérico de segurança</div>
+              <div class="layer"><b>User:</b> código da função + alerta do Semgrep</div>
+            </div>
+            <p class="sub" style="margin-top:0.6em; text-align:center">sem CWE, sem definição, sem exemplos</p>
+          </div>
+          <div>
+            <div class="stack-title" style="color:var(--blue-deep)">Especialista — com a ficha da CWE</div>
+            <div class="stack">
+              <div class="layer"><b>System:</b> especialista em segurança de Go</div>
+              <div class="layer"><b>User:</b> código da função + alerta do Semgrep</div>
+              <div class="layer plus"><b>1 · Ancoragem teórica</b> — definição da CWE e condições para a exploração</div>
+              <div class="layer plus"><b>2 · Heurísticas de Go</b> — biblioteca padrão, valores padrão, <code>sync.Mutex</code></div>
+              <div class="layer plus"><b>3 · Exemplos por contraste</b> — um caso vulnerável e um seguro da mesma CWE</div>
+            </div>
+          </div>
+        </div>
+        <div class="hl" style="margin-top:0.7em"><b>15 fichas + 1 genérica</b>, escritas por CWE <b>antes da primeira execução</b>, sem olhar as amostras · saída em JSON com o veredito e a justificativa</div>
+      </section>
+
+      <!-- ============ 9a. EXEMPLO DE PROMPT BASELINE ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Um <em>prompt</em> <em>baseline</em> completo</h2>
+        <p class="sub" style="margin:0 0 0.35em 0; font-size:0.56em">Caso real da base · <code>siyuan-note/siyuan</code>, arquivo <code>etag.go</code> · alerta de SHA-1 (CWE-328) · gabarito <b>seguro</b> · texto exatamente como enviado ao modelo</p>
+        <div class="prompt-real uma"><div class="pcol"><div class="pb inst"><span class="pr">instrução</span>Atue como um analista de segurança de aplicações.
+
+Abaixo está um alerta emitido por uma ferramenta de análise estática sobre um
+trecho de código Go, junto com o código ao redor do ponto apontado. Decida se o
+alerta é um VERDADEIRO POSITIVO (VP) — descreve uma vulnerabilidade real neste
+código — ou um FALSO POSITIVO (FP) — o padrão foi sinalizado, mas neste
+contexto não constitui vulnerabilidade.</div><div class="pb dado"><span class="pr">alerta e código (Fase 1)</span>ALERTA E CÓDIGO FONTE:
+Alerta Semgrep: go.lang.security.audit.crypto.use_of_weak_crypto.use-of-sha1
+Mensagem: Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.
+Localização: linha 84
+
+--- CÓDIGO FONTE RELEVANTE ---
+
+[Arquivo: etag.go | Linhas 82 a 90]
+func CalSha1(b []byte, r io.Reader) ([]byte, error) {
+
+	h := sha1.New()
+	_, err := io.Copy(h, r)
+	if err != nil {
+		return nil, err
+	}
+	return h.Sum(b), nil
+}</div><div class="pb inst"><span class="pr">contrato de saída</span>RESPONDA ESTRITAMENTE EM JSON, contendo duas chaves exatas:
+{"verdict": "VP" ou "FP", "reasoning": "Sua justificativa técnica e direta"}</div></div></div>
+        <p class="mini-nota" style="text-align:center">No especialista, a primeira linha muda e as três camadas da ficha entram entre a instrução e o alerta.</p>
+      </section>
+
+      <!-- ============ 9b. EXEMPLO DE PROMPT ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Um <em>prompt</em> especialista completo</h2>
+        <p class="sub" style="margin:0 0 0.35em 0; font-size:0.56em">Caso real da base · <code>siyuan-note/siyuan</code>, arquivo <code>etag.go</code> · alerta de SHA-1 (CWE-328) · gabarito <b>seguro</b> · texto exatamente como enviado ao modelo</p>
+        <div class="prompt-real"><div class="pcol"><div class="pb inst"><span class="pr">instrução</span>Atue como Arquiteto de Segurança Sênior especialista em Go (Golang).
+
+Abaixo está um alerta emitido por uma ferramenta de análise estática sobre um
+trecho de código Go, junto com o código ao redor do ponto apontado. Decida se o
+alerta é um VERDADEIRO POSITIVO (VP) — descreve uma vulnerabilidade real neste
+código — ou um FALSO POSITIVO (FP) — o padrão foi sinalizado, mas neste
+contexto não constitui vulnerabilidade.</div><div class="pb ficha"><span class="pr">ficha · camada 1</span>CAMADA 1 — DEFINIÇÃO DA FRAQUEZA (CWE-328)
+Uso de hash fraco: a função de hash empregada não atende às expectativas de segurança do contexto, seja por fragilidade do próprio algoritmo, seja por aplicá-lo de forma que quebra suas garantias (por exemplo, hash rápido e sem sal para senhas). Isso viabiliza ataques de pré-imagem, colisão ou tabela arco-íris mais eficientes que a força bruta.</div><div class="pb ficha"><span class="pr">ficha · camada 2</span>CAMADA 2 — HEURÍSTICA DE TRIAGEM EM GO
+Em Go, procurar por funções de hash de propósito geral - sha256.Sum256, sha512.Sum512, e as já quebradas md5.Sum/sha1.Sum - aplicadas a senhas ou segredos que exigem KDF com sal e custo (golang.org/x/crypto/bcrypt, scrypt, argon2). A mesma função em integridade de arquivo, endereçamento de conteúdo ou checksum não caracteriza a fraqueza.</div><div class="pb ficha"><span class="pr">ficha · camada 3</span>CAMADA 3 — PAR DE REFERÊNCIA (mesma API, contextos opostos)
+
+Exemplo de VERDADEIRO POSITIVO:
+```go
+func armazenarSenha(senha string) string {
+	// SHA-256 é rápido e sem sal: inadequado para armazenar senha
+	soma := sha256.Sum256([]byte(senha))
+	return hex.EncodeToString(soma[:])
+}
+```
+Por quê: sha256.Sum256 sobre senha: hash rápido, sem sal e sem fator de trabalho, permite ataque de dicionário e força bruta em GPU (o correto seria bcrypt/scrypt/argon2).</div></div><div class="pcol"><div class="pb ficha"><span class="pr">camada 3 (cont.)</span>Exemplo de FALSO POSITIVO:
+```go
+func idConteudo(dados []byte) string {
+	// integridade / endereçamento de conteúdo: SHA-256 é adequado
+	soma := sha256.Sum256(dados)
+	return hex.EncodeToString(soma[:])
+}
+```
+Por quê: sha256.Sum256 para integridade/identificação de conteúdo: a propriedade exigida é resistência a colisão, plenamente atendida por SHA-256.
+
+Decida pelo CONTEXTO em que a API é usada, não pelo reconhecimento da API: os
+dois exemplos acima usam a mesma construção e recebem vereditos opostos.</div><div class="pb dado"><span class="pr">alerta e código (Fase 1)</span>ALERTA E CÓDIGO FONTE:
+Alerta Semgrep: go.lang.security.audit.crypto.use_of_weak_crypto.use-of-sha1
+Mensagem: Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.
+Localização: linha 84
+
+--- CÓDIGO FONTE RELEVANTE ---
+
+[Arquivo: etag.go | Linhas 82 a 90]
+func CalSha1(b []byte, r io.Reader) ([]byte, error) {
+
+	h := sha1.New()
+	_, err := io.Copy(h, r)
+	if err != nil {
+		return nil, err
+	}
+	return h.Sum(b), nil
+}</div><div class="pb inst"><span class="pr">contrato de saída</span>RESPONDA ESTRITAMENTE EM JSON, contendo duas chaves exatas:
+{"verdict": "VP" ou "FP", "reasoning": "Sua justificativa técnica e direta"}</div></div></div>
+      </section>
+
+      <!-- ============ 9c. RESPOSTAS AO EXEMPLO ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>O mesmo alerta nos dois <em>prompts</em></h2>
+        <p class="sub" style="margin:0 0 0.5em 0; font-size:0.6em">Função <code>CalSha1</code> de <code>etag.go</code> · o SHA-1 só gera a impressão digital do conteúdo de um arquivo (ETag) · gabarito <b>seguro</b></p>
+        <div class="grid2">
+          <div class="card">
+            <h3>Baseline <span class="tag">~360 tokens</span></h3>
+            <p class="sub">Recebe só a instrução genérica, o alerta e o código.</p>
+            <p class="veredito erro">VP · errou, o ruído foi mantido</p>
+            <p class="citacao">“O uso do algoritmo SHA1 é considerado inseguro devido à sua falta de resistência contra colisões. A mensagem do alerta indica que SHA1 não é adequado para ser usado como assinatura criptográfica e recomenda o uso de SHA256 ou SHA3 em seu lugar.”</p>
+          </div>
+          <div class="card azul">
+            <h3>Especialista <span class="tag">~900 tokens</span></h3>
+            <p class="sub">Recebe também a ficha da CWE-328, com as três camadas.</p>
+            <p class="veredito acerto">FP · acertou, o alerta foi descartado</p>
+            <p class="citacao">“A função CalSha1 é usada para calcular o SHA-1 de dados, mas <mark>não é aplicada a senhas ou segredos que exigem KDF com sal e custo</mark>. Em vez disso, ela parece ser usada para gerar um ETag (Entity Tag) [...]. Portanto, este uso do SHA-1 não constitui uma vulnerabilidade.”</p>
+          </div>
+        </div>
+        <div class="hl" style="margin-top:0.6em; font-size:0.62em">O <em>baseline</em> repete a mensagem do alerta. O especialista usa o critério da ficha (camada 2) e decide pelo uso da função, não pelo nome do algoritmo.</div>
+        <p class="mini-nota">qwen2.5-coder:7b, modo filtro, rodada R3, temperatura 0 · o modelo comercial descartou este alerta com os dois <em>prompts</em></p>
+      </section>
+
+      <!-- ============ 10. BASE DE VALIDAÇÃO ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Base de validação: 2.328 casos reais</h2>
+        <div class="cols" style="margin-top:0.4em">
+          <div class="card verde">
+            <h3 style="color:var(--good-text)">1.531 casos seguros</h3>
+            <p class="sub">Falsos positivos do <b>SastBench</b>, filtrado só para Go, e a <b>versão corrigida</b> de cada CVE.</p>
+          </div>
+          <div class="card vermelho">
+            <h3 style="color:var(--crit-text)">797 casos vulneráveis</h3>
+            <p class="sub">CVEs de projetos Go · trilha <b>ouro</b> (SastBench + OSV.dev) e <b>prata</b> (direto da OSV.dev) · todas as 9.113 entradas de Go da OSV foram varridas.</p>
+          </div>
+        </div>
+        <div class="flow" style="margin-top:0.8em">
+          <div class="step io"><b>CVE</b><span class="mini">vulnerabilidade documentada</span></div>
+          <div class="arr">▶</div>
+          <div class="step io"><b><em>Commit</em> de correção</b><span class="mini">localizado pela OSV.dev</span></div>
+          <div class="arr">▶</div>
+          <div class="step sink"><b>Arquivo antes</b><span class="mini">rótulo vulnerável</span></div>
+          <div class="step san"><b>Arquivo depois</b><span class="mini">rótulo seguro</span></div>
+        </div>
+        <div class="hl hl-warn" style="margin-top:0.6em"><b>O rótulo vale para o arquivo inteiro</b> que a correção alterou, e o modelo recebe só a função <span class="sub">— técnica do CVEfixes e do BigVul, e um ponto que pesa nos resultados</span></div>
+      </section>
+
+      <!-- ============ 11. MODOS ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Dois modos de execução</h2>
+        <svg class="modos" viewBox="0 0 1095 248" role="img" aria-label="Fluxo dos casos pela esteira nos modos de filtro e de triagem">
+          <defs>
+            <marker id="mseta" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ponta"/></marker>
+            <marker id="mseta-tri" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ponta-tri"/></marker>
+          </defs>
+          <rect class="cx io" x="0" y="20" width="112" height="72" rx="10"/>
+          <text class="t1" x="56" y="50.96">Base</text>
+          <text class="t2" x="56" y="76.16">2.328 casos</text>
+          <line class="s" x1="112" y1="56" x2="148" y2="56" marker-end="url(#mseta)"/>
+          <rect class="cx fase" x="148" y="20" width="112" height="72" rx="10"/>
+          <text class="t1" x="204" y="50.96">Fase 1</text>
+          <text class="t2" x="204" y="76.16">Semgrep</text>
+          <line class="s" x1="260" y1="56" x2="296" y2="56" marker-end="url(#mseta)"/>
+          <polygon class="cx dec" points="296,56 361,14 426,56 361,98"/>
+          <text class="t3" x="361" y="53">detectou</text>
+          <text class="t3" x="361" y="73">a CWE?</text>
+          <line class="s" x1="426" y1="56" x2="536" y2="56" marker-end="url(#mseta)"/>
+          <text class="rot" x="481" y="44"><tspan class="b">sim · 827</tspan></text>
+          <rect class="cx fase" x="536" y="20" width="112" height="72" rx="10"/>
+          <text class="t1" x="592" y="50.96">Fase 2</text>
+          <text class="t2" x="592" y="76.16">Middleware</text>
+          <line class="s" x1="648" y1="56" x2="684" y2="56" marker-end="url(#mseta)"/>
+          <rect class="cx fase" x="684" y="20" width="112" height="72" rx="10"/>
+          <text class="t1" x="740" y="50.96">Fase 3</text>
+          <text class="t2" x="740" y="76.16"><tspan font-style="italic">Prompt</tspan></text>
+          <line class="s" x1="796" y1="56" x2="832" y2="56" marker-end="url(#mseta)"/>
+          <rect class="cx llm" x="832" y="20" width="112" height="72" rx="10"/>
+          <text class="t1" x="888" y="50.96">Fase 4</text>
+          <text class="t2" x="888" y="76.16">LLM</text>
+          <line class="s" x1="944" y1="56" x2="980" y2="56" marker-end="url(#mseta)"/>
+          <rect class="cx fase" x="980" y="20" width="112" height="72" rx="10"/>
+          <text class="t1" x="1036" y="50.96">Fase 5</text>
+          <text class="t2" x="1036" y="76.16">Auditoria</text>
+          <line class="s" x1="361" y1="98" x2="361" y2="207"/>
+          <line class="s" x1="361" y1="207" x2="241" y2="207" marker-end="url(#mseta)"/>
+          <line class="s" x1="361" y1="207" x2="481" y2="207" marker-end="url(#mseta)"/>
+          <text class="rot ini" x="373" y="138"><tspan class="b">não · 1.501</tspan></text>
+          <rect class="cx fora" x="31" y="176" width="210" height="62" rx="10"/>
+          <text class="t1" x="136" y="202.66">723 seguros</text>
+          <text class="t2" x="136" y="224.36">ficam de fora</text>
+          <rect class="cx tri" x="481" y="176" width="222" height="62" rx="10"/>
+          <text class="t1" x="592" y="202.66">778 vulneráveis</text>
+          <text class="t2" x="592" y="224.36">no filtro, param aqui</text>
+          <line class="s-tri" x1="592" y1="176" x2="592" y2="92" marker-end="url(#mseta-tri)"/>
+          <text class="rot tri-t ini" x="606" y="141"><tspan class="b">só na triagem · injetados</tspan></text>
+        </svg>
+        <div class="modos-leg">
+          <span><i class="cheia"></i><b>Filtro</b> · o sistema real · só os alertas · 827 casos</span>
+          <span><i class="tracejada"></i><b>Triagem</b> · medição · soma os vulneráveis que o Semgrep perdeu · 1.605 casos</span>
+        </div>
+      </section>
+
+      <!-- ============ 11b. CONTEXTO NOS MODOS ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>O que o modelo recebe em cada modo</h2>
+        <div class="cols" style="align-items:flex-start">
+          <div>
+            <p class="codigo-tit">Modo de filtro</p>
+<pre class="codigo">Alerta Semgrep: go.lang.security.audit.net.cookie-...
+Mensagem: A session cookie was detected without ...
+Localização: linha 113
+--- CÓDIGO FONTE RELEVANTE ---
+[Arquivo: oidc.go | Linhas 105 a 123]
+func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
+    ...</pre>
+          </div>
+          <div>
+            <p class="codigo-tit">Modo de triagem · todos os casos</p>
+<pre class="codigo"><span class="dim">(sem regra, sem mensagem, sem linha)</span>
+
+
+--- CÓDIGO FONTE RELEVANTE ---
+[Arquivo: oidc.go | Linhas 105 a 123]
+func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
+    ...</pre>
+          </div>
+        </div>
+        <h3 style="margin-top:0.7em">Cuidados para a comparação ser justa no modo de triagem</h3>
+        <ul class="tight" style="margin-top:0.2em">
+          <li><b>Regra, mensagem e linha do alerta saem de todos os casos</b> <span class="gloss">— um caso injetado não tem alerta, e o modelo poderia decidir pela origem do caso, e não pelo código</span></li>
+          <li><b>Grupo de controle</b> <span class="gloss">— os 19 vulneráveis que o Semgrep detectou também entram na triagem, no mesmo formato dos 778 injetados, e comparar o acerto nos dois grupos mostra se a origem do caso pesou no resultado</span></li>
+          <li><b>Pergunta direta</b> <span class="gloss">— "decida se o código contém a fraqueza", já que um caso sem alerta não tem alerta a validar</span></li>
+        </ul>
+      </section>
+
+      <!-- ============ 12. MÉTRICAS ============ -->
+      <section>
+        <p class="kicker">Metodologia</p>
+        <h2>Métricas</h2>
+        <table class="compacta grande" style="margin-top:0.6em">
+          <tr><th style="width:17%">Questão</th><th style="width:38%">Métrica</th><th>O que mostra</th></tr>
+          <tr><td><b>Geral</b></td><td>Taxa de Redução de Alertas (TRA) · FP filtrados</td><td>quanto da pilha de alertas some</td></tr>
+          <tr><td><b>Q1</b></td><td>Precisão, F1, MCC · <b>teste de McNemar</b> pareado</td><td>se o especialista acerta mais que o <em>baseline</em> nos mesmos casos</td></tr>
+          <tr><td><b>Q2</b></td><td><em>Recall</em> · Taxa de Falsos Negativos (TFN)</td><td>quantos vulneráveis o modelo descarta</td></tr>
+          <tr><td><b>Q3</b></td><td>Acurácia por CWE · detecção do Semgrep por CWE</td><td>o que muda entre categorias</td></tr>
+          <tr><td><b>Q4</b></td><td>Auditoria de 50 justificativas</td><td>fundada, motivo errado ou alucinação</td></tr>
+          <tr class="grupo"><td colspan="3"><em>Análise complementar</em></td></tr>
+          <tr><td><b>Entre modelos</b></td><td>J de Youden, na triagem</td><td>se o modelo reconhece melhor ou só alarma mais</td></tr>
+        </table>
+      </section>
+
+      <!-- ============ 12b. RODADAS ============ -->
+      <section>
+        <p class="kicker">Resultados</p>
+        <h2>As rodadas do experimento</h2>
+        <table class="compacta grande">
+          <tr><th>Rodada</th><th>Modelo</th><th>Modo</th><th>O que muda</th></tr>
+          <tr><td>1</td><td>qwen2.5-coder:7b</td><td>filtro</td><td>primeira execução, 948 casos</td></tr>
+          <tr><td>2</td><td>qwen2.5-coder:7b</td><td>filtro</td><td>só conta como detecção o alerta com a CWE exata do caso</td></tr>
+          <tr class="destaque"><td>3</td><td>qwen2.5-coder:7b</td><td>filtro</td><td>população completa, 2.328 casos · referência do filtro</td></tr>
+          <tr><td>4</td><td>qwen2.5-coder:7b</td><td>triagem</td><td>primeira triagem, contexto só com o código</td></tr>
+          <tr><td>5</td><td>qwen2.5-coder:7b</td><td>triagem</td><td>pergunta direta sobre o código</td></tr>
+          <tr><td>6</td><td>gemma2:9b</td><td>triagem</td><td>troca do modelo</td></tr>
+          <tr><td>7</td><td>os dois locais</td><td>os dois</td><td>fichas por regra · gemma2:9b no filtro</td></tr>
+          <tr><td>Comercial</td><td>gpt-6-luna</td><td>os dois</td><td>sem raciocínio (2 execuções), esforço baixo e alto</td></tr>
+          <tr><td>Reexecução</td><td>os das R4 a R6</td><td>triagem</td><td>mesma configuração · R4 e R6 reproduzem, R5 perde a significância</td></tr>
+        </table>
+        <p class="sub" style="margin-top:0.5em">Nas Rodadas 1 a 6, <b>cada rodada muda uma única variável</b> em relação à anterior.</p>
+      </section>
+
+      <!-- ============ 13. FUNIL ============ -->
+      <section>
+        <p class="kicker">Resultados</p>
+        <h2>Ponto de partida: o que chega ao modelo</h2>
+        <div class="funil">
+          <div class="etapa">
+            <div class="nome">População</div>
+            <div class="faixa"><div class="seg cinza" style="width:100%">2.328 casos</div></div>
+          </div>
+          <div class="etapa">
+            <div class="nome">Gabarito</div>
+            <div class="faixa">
+              <div class="seg verde" style="width:65.77%">1.531 seguros</div>
+              <div class="seg vermelho" style="width:34.23%">797 vulneráveis</div>
+            </div>
+          </div>
+          <div class="etapa">
+            <div class="nome">Semgrep<span>Fase 1</span></div>
+            <div class="faixa">
+              <div class="seg laranja" style="width:34.71%">808 com alerta (ruído)</div>
+              <div class="seg cinza" style="width:31.06%">723 sem alerta</div>
+              <div class="seg azul-fino" style="width:0.82%" title="19 vulneráveis detectados"></div>
+              <div class="seg cinza" style="width:33.42%">778 não detectados</div>
+            </div>
+          </div>
+          <div class="etapa">
+            <div class="nome">LLM<span>modo de filtro</span></div>
+            <div class="faixa">
+              <div class="seg laranja" style="width:34.71%">808 alarmes falsos</div>
+              <div class="seg vazio" style="width:31.06%">fora do modelo</div>
+              <div class="seg azul-fino" style="width:0.82%" title="19 vulneráveis detectados"></div>
+              <div class="seg vazio" style="width:33.42%">fora do modelo</div>
+            </div>
+          </div>
+        </div>
+        <p class="mini-nota" style="text-align:center">A faixa azul estreita são os <b>19 vulneráveis detectados</b> · Rodada 3 · larguras proporcionais às contagens</p>
+        <div class="stats menor" style="margin-top:0.5em">
+          <div class="stat ruim"><div class="valor">2,38%</div><div class="rotulo">dos vulneráveis receberam alerta na CWE do caso (19 de 797)</div></div>
+          <div class="stat"><div class="valor">827</div><div class="rotulo">alertas na <b>pilha</b> que o desenvolvedor receberia · só 2,3% vulneráveis</div></div>
+          <div class="stat"><div class="valor">&gt; 5 p.p.</div><div class="rotulo">de <em>recall</em> por caso, com 19 vulneráveis · por isso existe o modo de triagem</div></div>
+        </div>
+      </section>
+
+      <!-- ============ 14. QUESTÃO GERAL ============ -->
+      <section>
+        <p class="kicker">Resultados · Questão Geral</p>
+        <h2>Como filtro, a pilha de alertas quase some</h2>
+        <div class="stats">
+          <div class="stat bom"><div class="valor">827 → 15</div><div class="rotulo">alertas a revisar com o <code>qwen2.5-coder:7b</code> e o especialista (Rodada 3)</div></div>
+          <div class="stat azul"><div class="valor">98,2–98,7%</div><div class="rotulo">de TRA em 4 rodadas · 98,51 · 98,74 · 98,19 · 98,31 · três populações e dois contextos</div></div>
+          <div class="stat ruim"><div class="valor">16 de 19</div><div class="rotulo">alertas verdadeiros descartados junto com o ruído (TFN de 84,2%)</div></div>
+        </div>
+        <table class="compacta" style="margin-top:0.6em">
+          <tr><th><em>Prompt</em> (Rodada 3)</th><th class="num">Alertas descartados</th><th class="num">TRA</th><th class="num">Alarmes falsos descartados</th></tr>
+          <tr><td><em>Baseline</em></td><td class="num">701 de 825</td><td class="num">85,0%</td><td class="num">690 de 806 (85,6%)</td></tr>
+          <tr class="destaque"><td><b>Especialista</b></td><td class="num">812 de 827</td><td class="num"><b>98,2%</b></td><td class="num">796 de 808 (98,5%)</td></tr>
+        </table>
+        <div class="hl hl-warn" style="margin-top:0.5em"><b>É específico desse modelo.</b> <span class="sub">Nas mesmas condições, o <code>gemma2:9b</code> descarta 78,5% com o especialista e o <code>gpt-6-luna</code> de 66% a 70%. E a TRA sozinha engana, porque descartar tudo daria 100%.</span></div>
+      </section>
+
+      <!-- ============ 15. Q1 POR MODELO ============ -->
+      <section>
+        <p class="kicker">Resultados · Q1</p>
+        <h2>O efeito da ficha depende do modelo</h2>
+        <p class="sub">Teste de McNemar no modo de filtro · conta só os casos em que os dois <em>prompts</em> discordam</p>
+        <div class="grid3" style="margin-top:0.4em">
+          <div class="card verde">
+            <h3 style="color:var(--good-text)">qwen2.5-coder:7b · ajuda</h3>
+            <p class="sub"><b style="font-size:1.6em">104 × 5</b><br>casos em que só o especialista acerta × só o <em>baseline</em> acerta · <i>p</i> &lt; 0,0001</p>
+            <p class="sub" style="margin-top:0.4em">alarmes falsos de <b>116 para 12</b></p>
+          </div>
+          <div class="card vermelho">
+            <h3 style="color:var(--crit-text)">gemma2:9b · atrapalha</h3>
+            <p class="sub"><b style="font-size:1.6em">49 × 96</b><br>a vantagem se inverte · <i>p</i> = 0,0001</p>
+            <p class="sub" style="margin-top:0.4em">alarmes falsos de <b>127 para 173</b>, concentrados na CWE-327</p>
+          </div>
+          <div class="card">
+            <h3>gpt-6-luna · instável</h3>
+            <p class="sub"><b style="font-size:1.6em"><i>p</i> = 0,032 · 0,227</b><br>significativo numa execução e não na outra</p>
+            <p class="sub" style="margin-top:0.4em">na triagem, o especialista vence nas duas (189 × 110 e 187 × 105)</p>
+          </div>
+        </div>
+        <div class="hl" style="margin-top:0.7em"><b>Por que a CWE-327 piora:</b> <span class="sub">a ficha trata de <em>hash</em> fraco em senha, mas os alertas apontam TLS sem versão mínima, e o modelo mistura os dois perigos</span></div>
+      </section>
+
+      <!-- ============ 18. Q2 FILTRO ============ -->
+      <section>
+        <p class="kicker">Resultados · Q2</p>
+        <h2>No filtro, os vulneráveis vão junto com o ruído</h2>
+        <table class="compacta">
+          <tr><th>Modelo e <em>prompt</em> (modo de filtro)</th><th class="num">VP</th><th class="num">FN</th><th class="num">FP</th><th class="num"><em>Recall</em></th><th class="num">TRA</th><th class="num">MCC</th></tr>
+          <tr><td><code>qwen2.5-coder:7b</code> · <em>baseline</em> (R3)</td><td class="num">8</td><td class="num">11</td><td class="num">116</td><td class="num">42,1%</td><td class="num">85,0%</td><td class="num">+0,116</td></tr>
+          <tr class="destaque"><td><code>qwen2.5-coder:7b</code> · especialista (R3)</td><td class="num">3</td><td class="num">16</td><td class="num">12</td><td class="num">15,8%</td><td class="num">98,2%</td><td class="num">+0,161</td></tr>
+          <tr><td><code>gemma2:9b</code> · <em>baseline</em> (R7)</td><td class="num">5</td><td class="num">14</td><td class="num">127</td><td class="num">26,3%</td><td class="num">83,9%</td><td class="num">+0,043</td></tr>
+          <tr><td><code>gemma2:9b</code> · especialista (R7)</td><td class="num">4</td><td class="num">15</td><td class="num">173</td><td class="num">21,1%</td><td class="num">78,5%</td><td class="num">−0,002</td></tr>
+          <tr><td><code>gpt-6-luna</code> · os dois <em>prompts</em></td><td class="num" colspan="3">9 a 12 de 19 · 240 a 269 FP</td><td class="num">47–63%</td><td class="num">66–70%</td><td class="num">+0,06 a +0,10</td></tr>
+        </table>
+        <p class="mini-nota">19 vulneráveis em 827 alertas · gemma sobre 822 vereditos válidos</p>
+        <ul class="tight" style="margin-top:0.5em">
+          <li><b>Locais descartam mais da metade dos 19</b> <span class="gloss">— o comercial perde de um terço a metade, mas mantém de 240 a 269 alarmes falsos, contra 12 do especialista do qwen</span></li>
+          <li><b>Com 19 casos, <em>recall</em> e MCC mostram só a ordem de grandeza</b> <span class="gloss">— o lado seguro, com 808 alertas, é o que se sustenta</span></li>
+        </ul>
+      </section>
+
+      <!-- ============ 20. SUPRESSÃO ============ -->
+      <section>
+        <p class="kicker">Resultados · Q2</p>
+        <h2>Supressão excessiva: reduzir a pilha descartando tudo</h2>
+        <div class="cols" style="align-items:center">
+          <div style="flex:1.05">
+            <svg class="disp" viewBox="0 0 540 390" width="100%" role="img" aria-label="TRA contra TFN das configurações do qwen2.5-coder:7b">
+              <!-- grade -->
+              <line class="grade" x1="70" y1="20" x2="70" y2="330"/><line class="grade" x1="180" y1="20" x2="180" y2="330"/>
+              <line class="grade" x1="290" y1="20" x2="290" y2="330"/><line class="grade" x1="400" y1="20" x2="400" y2="330"/>
+              <line class="grade" x1="510" y1="20" x2="510" y2="330"/>
+              <line class="grade" x1="70" y1="330" x2="510" y2="330"/><line class="grade" x1="70" y1="226.7" x2="510" y2="226.7"/>
+              <line class="grade" x1="70" y1="123.3" x2="510" y2="123.3"/><line class="grade" x1="70" y1="20" x2="510" y2="20"/>
+              <!-- ticks -->
+              <text class="eixo-t" x="70" y="348" text-anchor="middle">0,80</text><text class="eixo-t" x="180" y="348" text-anchor="middle">0,85</text>
+              <text class="eixo-t" x="290" y="348" text-anchor="middle">0,90</text><text class="eixo-t" x="400" y="348" text-anchor="middle">0,95</text>
+              <text class="eixo-t" x="510" y="348" text-anchor="middle">1,00</text>
+              <text class="eixo-t" x="62" y="334" text-anchor="end">0,4</text><text class="eixo-t" x="62" y="231" text-anchor="end">0,6</text>
+              <text class="eixo-t" x="62" y="127" text-anchor="end">0,8</text><text class="eixo-t" x="62" y="24" text-anchor="end">1,0</text>
+              <text class="eixo-n" x="290" y="376" text-anchor="middle">TRA · fração de alertas descartados</text>
+              <text class="eixo-n" x="18" y="175" text-anchor="middle" transform="rotate(-90 18 175)">TFN · vulneráveis perdidos</text>
+              <!-- referência: descarta tudo -->
+              <polyline class="ref-l" points="290,20 510,20 510,140"/>
+              <rect class="ref" x="503" y="13" width="14" height="14"/>
+              <text class="ref-t" x="500" y="44" text-anchor="end">classificador que descarta tudo</text>
+              <!-- pontos -->
+              <circle class="ponto" cx="180" cy="237.5" r="7"><title>baseline (R3) · TRA 85,0% · TFN 57,9%</title></circle>
+              <text class="rot" x="190" y="241">baseline (R3)</text>
+              <circle class="ponto" cx="470.4" cy="101.6" r="7"><title>especialista (R3) · TRA 98,2% · TFN 84,2%</title></circle>
+              <text class="rot" x="460" y="88" text-anchor="end">especialista (R3)</text>
+              <circle class="ponto" cx="400" cy="183.3" r="7"><title>especialista direto (R5) · TRA 95,0% · TFN 68,4%</title></circle>
+              <text class="rot" x="390" y="187" text-anchor="end">especialista direto (R5)</text>
+              <circle class="ponto" cx="504.7" cy="20" r="6"><title>baseline sem os campos do alerta (R4) · descarta 822 de 824 · TFN 100%</title></circle>
+              <text class="rot" x="420" y="70" text-anchor="end">baseline sem o alerta (R4)</text>
+              <line x1="423" y1="64" x2="499" y2="25" stroke="#52514e" stroke-width="1"/>
+            </svg>
+            <p class="mini-nota" style="text-align:center"><code>qwen2.5-coder:7b</code> sobre a pilha de alertas</p>
+          </div>
+          <div style="flex:0.95">
+            <ul class="tight" style="font-size:0.84em">
+              <li><b>O especialista fica perto do canto que descarta tudo</b> <span class="gloss">— 98,2% de TRA com 84,2% de TFN</span></li>
+              <li><b>A ficha desloca o limiar de decisão</b> <span class="gloss">— muda a facilidade de responder "vulnerável", sem aprofundar a análise</span></li>
+              <li><b>Não é exclusivo de modelo pequeno</b> <span class="gloss">— no ZeroFalse, o gemini-2.5-pro tem <em>recall</em> de 0,229 em dados reais</span></li>
+              <li><b>O comercial erra para o outro lado</b> <span class="gloss">— alarma demais, pelo mesmo mecanismo</span></li>
+            </ul>
+            <div class="hl" style="font-size:0.66em">O Rican, que é <b>são</b>, remove 45% dos alarmes <b>sem perder nenhum</b> verdadeiro · o filtro remove 98% e perde 16 de 19</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 20b. Q2 TRIAGEM ============ -->
+      <section>
+        <p class="kicker">Resultados · Q2</p>
+        <h2>Na triagem, pouco do que o Semgrep perdeu volta</h2>
+        <p class="sub"><em>Recall</em> sobre os 778 vulneráveis que o Semgrep não detectou (os <b>injetados</b>), com o especialista e a pergunta direta</p>
+        <div class="stats" style="margin-top:0.5em">
+          <div class="stat ruim"><div class="valor">4,3–7,4%</div><div class="rotulo">modelos locais · <code>qwen2.5-coder:7b</code> e <code>gemma2:9b</code></div></div>
+          <div class="stat"><div class="valor">≈ 17%</div><div class="rotulo"><code>gpt-6-luna</code> sem raciocínio · duas execuções</div></div>
+          <div class="stat azul"><div class="valor">33–39%</div><div class="rotulo"><code>gpt-6-luna</code> com raciocínio · esforço baixo e alto</div></div>
+        </div>
+        <ul class="tight" style="margin-top:0.7em">
+          <li><b>O valor mais alto é do <em>baseline</em> com esforço alto, 51,4%</b> <span class="gloss">— mas ele alarma em 44,3% dos alertas seguros</span></li>
+          <li><b>E os números são otimistas</b> <span class="gloss">— o modelo recebe a CWE e o trecho apontados pelo gabarito, o que não existiria em produção</span></li>
+        </ul>
+        <div class="hl hl-warn" style="margin-top:0.5em"><b>Mesmo na configuração que mais recupera, metade dos casos perdidos continua perdida.</b></div>
+      </section>
+
+      <!-- ============ 21. Q3 ============ -->
+      <section>
+        <p class="kicker">Resultados · Q3</p>
+        <h2>Por categoria, quem decide é o analisador</h2>
+        <div class="cols" style="align-items:center">
+          <div style="flex:1.1">
+            <p class="codigo-tit" style="text-align:center">Detecção do Semgrep por CWE, em pares vulnerável/corrigido</p>
+            <div class="barras">
+              <div class="linha"><div class="rot"><b>CWE-89</b> injeção de SQL</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:97.25%" title="7 de 18"></div><span class="val" style="left:97.25%">38,9% (7/18)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-601</b> redirecionamento</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:75%" title="3 de 10"></div><span class="val" style="left:75%">30,0% (3/10)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-79</b> XSS</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:22%" title="5 de 57"></div><span class="val" style="left:22%">8,8% (5/57)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-94</b> injeção de código</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:9.5%" title="1 de 26"></div><span class="val" style="left:9.5%">3,8% (1/26)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-918</b> SSRF</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:2.25%" title="1 de 112"></div><span class="val" style="left:2.25%">0,9% (1/112)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-78</b> injeção de comando</div><div class="trilho" style="margin-right:90px"><span class="val" style="left:0">0% (0/24)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-345</b> autenticidade</div><div class="trilho" style="margin-right:90px"><span class="val" style="left:0">0% (0/45)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-200</b> exposição</div><div class="trilho" style="margin-right:90px"><span class="val" style="left:0">0% (0/92)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-22</b> <em>path traversal</em></div><div class="trilho" style="margin-right:90px"><span class="val" style="left:0">0% (0/114)</span></div></div>
+              <div class="linha"><div class="rot"><b>CWE-400</b> consumo de recursos</div><div class="trilho" style="margin-right:90px"><span class="val" style="left:0">0% (0/124)</span></div></div>
+              <div class="eixo" style="margin-right:90px"><span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>40%</span></div>
+            </div>
+          </div>
+          <div style="flex:0.9">
+            <ul class="tight" style="font-size:0.8em">
+              <li><b>Detecta o que cabe numa linha</b> <span class="gloss">— a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
+              <li><b>Falha no que depende do caminho do dado</b> <span class="gloss">— CWE-400, 22, 918 e 200 somam 442 pares e 1 detecção</span></li>
+              <li><b>A acurácia por CWE mede o ruído</b> <span class="gloss">— no XSS, 96,2% são só os 128 seguros entre 133 alertas</span></li>
+              <li><b>Concorrência sem instrumento</b> <span class="gloss">— 11 casos de condição de corrida (CWE-362) e <b>nenhum detectado</b></span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 22. Q4 ============ -->
+      <section>
+        <p class="kicker">Resultados · Q4</p>
+        <h2>A ficha influencia o raciocínio, nem sempre para melhor</h2>
+        <div class="cols" style="align-items:flex-start">
+          <div style="flex:0.85">
+            <table class="compacta">
+              <tr><th><em>Prompt</em></th><th class="num">Fundada</th><th class="num" style="white-space:normal">Motivo errado</th><th class="num">Alucinação</th><th class="num" style="white-space:normal">Acertos fundados</th></tr>
+              <tr><td><em>Baseline</em></td><td class="num">2</td><td class="num">22</td><td class="num">1</td><td class="num">1 de 4</td></tr>
+              <tr class="destaque"><td>Especialista</td><td class="num">4</td><td class="num">18</td><td class="num">3</td><td class="num">4 de 8</td></tr>
+            </table>
+            <p class="mini-nota">25 casos lidos nos dois <em>prompts</em> · Rodada 3 · critério registrado antes do sorteio · classificação não cega, feita pelos autores</p>
+            <div class="hl" style="margin-top:0.6em; font-size:0.7em"><b>Só 6 de 50 justificativas se apoiam no código.</b> Quando a heurística se aplica, o modelo a segue e acerta pelo motivo certo, como no MD5 e no <code>math/rand</code> usados fora de criptografia.</div>
+          </div>
+          <div style="flex:1.15">
+            <div class="grid2">
+              <div class="card"><h3>Repete a mensagem do alerta</h3><p class="sub">Diz que o <em>cookie</em> não tem <code>Secure</code> quando o código o define a partir de <code>isTLS(r)</code>.</p></div>
+              <div class="card"><h3>Copia o exemplo da ficha</h3><p class="sub">Justifica um caso de <code>exec.Command</code> com a frase do exemplo de <em>template</em> da CWE-94.</p></div>
+              <div class="card"><h3>Raciocínio certo, veredito oposto</h3><p class="sub">Descreve o TLS como boa prática e responde "verdadeiro positivo".</p></div>
+              <div class="card laranja"><h3>Recorte idêntico, rótulos opostos</h3><p class="sub">A correção mexeu em outra função, e o modelo recebe o mesmo trecho nas duas versões.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 22b. MODELOS ============ -->
+      <section>
+        <p class="kicker">Resultados · Modelos</p>
+        <h2>Trocar o modelo muda os números, não as conclusões</h2>
+        <div class="cols" style="align-items:center">
+          <div style="flex:1.15">
+            <p class="codigo-tit"><code>gpt-6-luna</code> no modo de triagem, pergunta direta</p>
+            <table class="compacta">
+              <tr><th><em>Prompt</em> e raciocínio</th><th class="num"><em>Recall</em> injetados</th><th class="num">Alarme em seguros</th><th class="num">J</th></tr>
+              <tr><td>especialista · sem</td><td class="num">17,1–17,3%</td><td class="num">10,2–10,5%</td><td class="num">+0,07</td></tr>
+              <tr class="destaque"><td>especialista · baixo</td><td class="num">32,7%</td><td class="num">14,4%</td><td class="num"><b>+0,18</b></td></tr>
+              <tr class="destaque"><td>especialista · alto</td><td class="num">38,6%</td><td class="num">20,7%</td><td class="num"><b>+0,18</b></td></tr>
+              <tr><td><em>baseline</em> · sem</td><td class="num">17,6–18,0%</td><td class="num">20,2–20,5%</td><td class="num">≈ 0</td></tr>
+              <tr><td><em>baseline</em> · alto</td><td class="num">51,4%</td><td class="num">44,3%</td><td class="num">+0,07</td></tr>
+            </table>
+            <p class="mini-nota">J de Youden = <em>recall</em> nos injetados − alarme nos seguros · 0 é o acaso · separa "reconhece melhor" de "alarma mais"</p>
+          </div>
+          <div style="flex:0.85">
+            <ul class="tight" style="font-size:0.8em">
+              <li><b>Melhor filtro é o menor</b> <span class="gloss">— <code>qwen2.5-coder:7b</code>, especializado em código</span></li>
+              <li><b>Maior não é melhor</b> <span class="gloss">— no filtro, com o especialista, 176 × 16 casos a favor do qwen contra o gemma2:9b</span></li>
+              <li><b>O comercial é o melhor na triagem</b> <span class="gloss">— e o raciocínio baixo é a <b>única melhora real de discriminação</b></span></li>
+              <li><b>Esforço alto só alarma mais</b> <span class="gloss">— o J fica igual</span></li>
+            </ul>
+            <p class="mini-nota">Comercial: κ de Cohen de 0,935 a 0,969 entre execuções · US$ 1,15 + US$ 1,92</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 23. TETO DE DETECÇÃO ============ -->
+      <section>
+        <p class="kicker">Resultados · Teto de detecção</p>
+        <h2>Por que a detecção não cede</h2>
+        <p class="sub">Coletar mais não ajudou · 257 pares deram 4,28% e a OSV inteira, 2,61% (só CWEs com regra para Go)</p>
+        <ol class="cadeia">
+          <li><span class="h">H1</span><span class="txt"><b>O conjunto de regras era o errado</b><br><span>o <code>p/golang</code> tem 42 regras Go contra 84 do <code>p/default</code> e perdia 97 alertas</span></span><span class="rej">REJEITADA</span></li>
+          <li><span class="h">H2</span><span class="txt"><b>Faltava analisar o fluxo entre arquivos</b><br><span>Semgrep Pro com 0 detecções novas em 5 casos · CodeQL recuperou 3 de 47 arquivos</span></span><span class="rej">REJEITADA</span></li>
+          <li><span class="h">H3</span><span class="txt"><b>Faltava regra em outro conjunto público</b><br><span><code>p/gosec</code>, <code>p/trailofbits</code> e <code>p/security-audit</code> sem regra Go nova para CWE-22 ou CWE-918</span></span><span class="rej">REJEITADA</span></li>
+          <li><span class="h">H4</span><span class="txt"><b>Faltava regra própria</b><br><span>casos divididos antes, em <em>commit</em> registrado · 6,7% (CWE-22) e 1,8% (CWE-918) no grupo de avaliação</span></span><span class="rej">REJEITADA</span></li>
+          <li class="sobra"><span class="h">→</span><span class="txt"><b>O que sobra está no gabarito, não no analisador</b><br><span>o rótulo é por arquivo, e muitas vezes a operação perigosa nem está no arquivo rotulado</span></span></li>
+        </ol>
+      </section>
+
+      <!-- ============ 23b. GRANULARIDADE DO RÓTULO ============ -->
+      <section>
+        <p class="kicker">Resultados · Teto de detecção</p>
+        <h2>Granularidade do rótulo</h2>
+        <div class="cols" style="align-items:center">
+          <div style="flex:1.05">
+            <p class="codigo-tit">handler.go · <span style="color:var(--crit-text)">rotulado vulnerável</span> (a correção mexeu aqui)</p>
+<pre class="codigo">func Baixar(w http.ResponseWriter, r *http.Request) {
+    nome := r.URL.Query().Get("arquivo")
+<span class="add">+   if strings.Contains(nome, "..") {
++       http.Error(w, "inválido", 400)
++       return
++   }</span>
+    s.armazenamento.Ler(nome)
+}</pre>
+            <p class="codigo-tit" style="margin-top:8px">armazenamento.go · fora do rótulo (a operação está aqui)</p>
+<pre class="codigo">func (s *Armazenamento) Ler(nome string) {
+    caminho := filepath.Join(s.base, nome)
+    f, err := <span class="realce">os.Open(caminho)</span>
+}</pre>
+            <p class="mini-nota">exemplo esquemático</p>
+          </div>
+          <div style="flex:0.95">
+            <p class="sub" style="margin-bottom:0.4em; font-size:0.62em">Leitura dos <b>226 casos vulneráveis</b> de CWE-22 e CWE-918, um a um</p>
+            <table class="compacta">
+              <tr><th></th><th class="num">CWE-22</th><th class="num">CWE-918</th></tr>
+              <tr class="destaque"><td><b>Sem a operação perigosa</b> no arquivo</td><td class="num"><b>25,4%</b></td><td class="num"><b>48,2%</b></td></tr>
+              <tr><td>Operação atrás de abstração (<code>afero</code>, <code>fs.FS</code>)</td><td class="num">19,3%</td><td class="num">30,4%</td></tr>
+              <tr><td>Dado vem de campo de <em>struct</em> <span class="src">(grupo de desenvolvimento)</span></td><td class="num">42,6%</td><td class="num">67,3%</td></tr>
+            </table>
+            <div class="hl" style="margin-top:0.6em; font-size:0.7em">Nenhuma regra encontra num arquivo algo que não está nele. <b>Parte da baixa detecção é limite da medição</b>, propriedade conhecida das bases derivadas de correções <span style="color:var(--muted)">(Croft et al., 2023)</span>, aqui medida para Go.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 26. DISCUSSÃO ============ -->
+      <section>
+        <p class="kicker">Resultados · Discussão</p>
+        <h2>Por que o ZeroFalse reporta F1 acima de 0,9</h2>
+        <div class="cols" style="align-items:center">
+          <div style="flex:0.85">
+            <div class="card" style="margin-bottom:10px">
+              <h3>OpenVuln (ZeroFalse) rotula o <b>alerta</b></h3>
+              <p class="sub">Só entra o que o CodeQL alertou. A vulnerabilidade sem alerta <b>fica de fora</b> e a detecção não é medida.</p>
+            </div>
+            <div class="card azul">
+              <h3 style="color:var(--blue-deep)">Este trabalho rotula o <b>arquivo</b>, antes</h3>
+              <p class="sub">O caso entra com ou sem alerta, e por isso foi possível medir que o Semgrep detecta <b>2,4%</b>.</p>
+            </div>
+            <p class="mini-nota" style="margin-top:8px">Somam-se linguagem (Java × Go), dados sintéticos × reais, o caminho do dado e o tamanho dos modelos.</p>
+          </div>
+          <div style="flex:1.15">
+            <p class="codigo-tit" style="text-align:center">Detecção de vulnerabilidades reais, em perspectiva</p>
+            <div class="barras">
+              <div class="linha"><div class="rot"><b>Semgrep</b></div><div class="trilho" style="margin-right:70px"><div class="b azul" style="width:5.95%"></div><span class="val" style="left:5.95%">2,4%</span></div></div>
+              <div class="linha"><div class="rot"><b>Modelos locais</b></div><div class="trilho" style="margin-right:70px"><div class="b azul-ext" style="width:18.53%"></div><div class="b azul" style="width:10.78%"></div><span class="val" style="left:18.53%">4,3–7,4%</span></div></div>
+              <div class="linha"><div class="rot"><b>Comercial</b>, sem raciocínio</div><div class="trilho" style="margin-right:70px"><div class="b azul-ext" style="width:43.25%"></div><div class="b azul" style="width:42.75%"></div><span class="val" style="left:43.25%">17,1–17,3%</span></div></div>
+              <div class="linha"><div class="rot"><b>Comercial</b>, com raciocínio</div><div class="trilho" style="margin-right:70px"><div class="b azul-ext" style="width:96.5%"></div><div class="b azul" style="width:81.75%"></div><span class="val" style="left:96.5%">32,7–38,6%</span></div></div>
+              <div class="sep"></div>
+              <div class="linha"><div class="rot">CodeQL, Java <span class="src">(Li et al., 2025)</span></div><div class="trilho" style="margin-right:70px"><div class="b cinza" style="width:56.25%"></div><span class="val" style="left:56.25%">22,5%</span></div></div>
+              <div class="linha"><div class="rot">4 ferramentas, cada uma <span class="src">(Bennett et al., 2024)</span></div><div class="trilho" style="margin-right:70px"><div class="b cinza-ext" style="width:66.25%"></div><div class="b cinza" style="width:28%"></div><span class="val" style="left:66.25%">11,2–26,5%</span></div></div>
+              <div class="linha"><div class="rot">4 ferramentas, juntas</div><div class="trilho" style="margin-right:70px"><div class="b cinza" style="width:97%"></div><span class="val" style="left:97%">38,8%</span></div></div>
+              <div class="eixo" style="margin-right:70px"><span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>40%</span></div>
+            </div>
+            <div class="chave"><span><i style="background:var(--blue)"></i>este trabalho, Go</span><span><i style="background:var(--java)"></i>estudos em Java</span><span>faixa clara · do menor ao maior valor</span></div>
+            <p class="mini-nota" style="text-align:center">Modelos sobre os 778 não detectados, com o especialista · valores <b>não comparáveis</b> entre si, só a ordem de grandeza</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 27. RESPOSTAS ============ -->
+      <section>
+        <p class="kicker">Considerações Finais</p>
+        <h2>Respostas às questões de pesquisa</h2>
+        <ul class="resp">
+          <li><span class="q">Geral</span><span class="curta">Sim, como filtro</span><span class="det">827 → 15 alertas, TRA de 98,2% a 98,7% em quatro rodadas · mas 16 dos 19 verdadeiros vão junto</span></li>
+          <li><span class="q">Q1</span><span class="curta">Depende do modelo</span><span class="det">ajuda o qwen2.5-coder:7b, atrapalha o gemma2:9b, instável no comercial · o <em>baseline</em> lia a fraqueza no alerta</span></li>
+          <li><span class="q">Q2</span><span class="curta">Reduz FP, mas introduz FN</span><span class="det">locais descartam mais da metade dos vulneráveis que recebem e recuperam 4–7% dos não detectados · comercial até 39%</span></li>
+          <li><span class="q">Q3</span><span class="curta">Parcial</span><span class="det">quem decide por categoria é o analisador · concorrência não mensurável, 0 de 11 casos detectados</span></li>
+          <li><span class="q">Q4</span><span class="curta">Influencia, nem sempre bem</span><span class="det">segue a heurística quando ela se aplica · senão copia o exemplo ou repete o alerta · 6 de 50 justificativas fundadas</span></li>
+        </ul>
+      </section>
+
+      <!-- ============ 28. DOIS LIMITES ============ -->
+      <section>
+        <p class="kicker">Considerações Finais</p>
+        <h2>Os dois limites da arquitetura</h2>
+        <div class="cols" style="margin-top:0.3em">
+          <div class="card laranja">
+            <h3 style="color:var(--orange)">1 · Detecção</h3>
+            <p class="sub">O Semgrep alerta só <b>2,4%</b> dos vulneráveis · quatro hipóteses rejeitadas · o que mais pesa é o <b>rótulo por arquivo</b>.</p>
+            <p class="sub" style="margin-top:0.5em">Afetou o próprio experimento · só 19 vulneráveis no filtro, por isso nasceu o modo de triagem.</p>
+          </div>
+          <div class="card vermelho">
+            <h3 style="color:var(--crit-text)">2 · Discriminação do modelo</h3>
+            <p class="sub">Mesmo nos 19 detectados, <b>nenhuma configuração</b> mantém a maioria sem manter dezenas ou centenas de alarmes falsos.</p>
+            <p class="sub" style="margin-top:0.5em"><em>Prompt</em>, pergunta e modelo <b>só deslocam o limiar</b> · única melhora real, comercial com raciocínio e especialista.</p>
+          </div>
+        </div>
+        <ul class="tight" style="margin-top:0.8em">
+          <li><b>Melhorar só a detecção não bastaria</b> <span class="gloss">— é indício, com n = 19 e um rótulo que às vezes aponta o arquivo errado</span></li>
+          <li><b>Mais contexto não foi decisivo</b> <span class="gloss">— só com o código, a TRA do especialista foi 98,31%, contra 98,19% com o alerta</span></li>
+        </ul>
+      </section>
+
+      <!-- ============ 28b. LIMITAÇÕES ============ -->
+      <section>
+        <p class="kicker">Considerações Finais</p>
+        <h2>Limitações</h2>
+        <ul class="tight" style="font-size:0.9em">
+          <li><b>19 vulneráveis no modo de filtro</b> <span class="gloss">— <em>recall</em> e MCC só dão a ordem de grandeza</span></li>
+          <li><b>Gabarito aproximado</b> <span class="gloss">— rótulo por arquivo e classe negativa que nem sempre se decide pela função</span></li>
+          <li><b>A CWE vem do gabarito</b> <span class="gloss">— os números do modo de triagem são otimistas</span></li>
+          <li><b>Auditoria da Q4</b> <span class="gloss">— não cega, sem concordância entre classificadores, 25 casos</span></li>
+          <li><b>Escopo de modelos</b> <span class="gloss">— locais quantizados em 4 bits e um único comercial, de faixa econômica</span></li>
+          <li><b>Só Go, e concorrência sem instrumento</b> <span class="gloss">— nenhuma ferramenta dinâmica foi usada</span></li>
+        </ul>
+      </section>
+
+      <!-- ============ 29. CONTRIBUIÇÕES ============ -->
+      <section>
+        <p class="kicker">Considerações Finais</p>
+        <h2>Contribuições</h2>
+        <div class="grid2" style="margin-top:0.3em">
+          <div class="card"><h3>Detecção medida sobre todos os vulneráveis</h3><p class="sub">Rotular antes de executar o analisador permite medir o que ele deixa passar, número que bases montadas a partir dos alertas não produzem.</p></div>
+          <div class="card"><h3>Imprecisão do rótulo por arquivo em Go</h3><p class="sub">226 casos lidos · em 25,4% (CWE-22) e 48,2% (CWE-918) o arquivo rotulado não tem a operação perigosa.</p></div>
+          <div class="card"><h3>O peso da mensagem do alerta</h3><p class="sub">Sem ela, o <em>baseline</em> vai de 8 a 0 acertos, e a auditoria acha justificativas que a repetem · deve ser tratada como variável do experimento.</p></div>
+          <div class="card"><h3>Esteira e dados abertos</h3><p class="sub">Código, base, <em>prompts</em>, fichas e registros das execuções em <code>github.com/DiegoSousaLeite/tcc-arquitetura-hibrida-go</code>.</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 31. TRABALHOS FUTUROS ============ -->
+      <section>
+        <p class="kicker">Considerações Finais</p>
+        <h2>Trabalhos futuros</h2>
+        <ul class="tight">
+          <li><b>O modelo antes do analisador</b> <span class="gloss">— identificar as funções de entrada, de caminho e de sanitização de cada projeto e virar regra do Semgrep, como o MEMHINT e o IRIS</span></li>
+          <li><b>Concorrência com análise dinâmica</b> <span class="gloss">— triagem junto com o detector de corrida do próprio Go</span></li>
+          <li><b>O <em>gosec</em> autônomo</b> <span class="gloss">— tem as regras G304 e G107, ausentes do conjunto de mesmo nome no Semgrep</span></li>
+          <li><b>Rótulo mais preciso</b> <span class="gloss">— na função ou na linha da operação perigosa, e não no arquivo</span></li>
+          <li><b>Modelos de topo de linha</b> <span class="gloss">— verificar se os dois limites persistem</span></li>
+        </ul>
+        <div class="hl" style="margin-top:0.8em">Antes do analisador é <b>a única posição em que o modelo poderia aumentar a detecção</b>.</div>
+      </section>
+
+      <!-- ============ 33. ENCERRAMENTO ============ -->
+      <section data-state="capa" class="capa-slide">
+        <div class="capa-inner">
+          <div class="inst">Obrigado!</div>
+          <h1 style="font-size:1.25em">O modelo reduziu o ruído do que o analisador encontrou, mas não recuperou o que ele deixou passar.</h1>
+          <div class="subtitulo" style="margin-bottom:26px">Perguntas?</div>
+          <div class="pessoas">
+            <b>Diego Sousa Leite</b> &nbsp;·&nbsp; <b>João Artur Leles Ferreira Pinheiro</b><br>
+            Orientadora: Profa. Dra. Elaine Venson · Universidade de Brasília — novembro de 2026
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ BACKUP: Q1 CONTROLE ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Q1</p>
+        <h2>O <em>baseline</em> não era um controle limpo</h2>
+        <div class="cols" style="margin-top:0.3em; align-items:center">
+          <div>
+            <p class="codigo-tit">O que o modelo recebe no modo de filtro</p>
+<pre class="codigo"><span class="dim">Alerta Semgrep:</span> go.lang.security.audit.net.cookie-...
+<span class="realce">Mensagem: A session cookie was detected
+          without setting the 'Secure' flag...</span>
+<span class="dim">Localização:</span> linha 113
+<span class="dim">--- CÓDIGO FONTE RELEVANTE ---</span>
+func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
+    ...</pre>
+            <p class="mini-nota">A mensagem do alerta <b>já nomeia a fraqueza</b>.</p>
+          </div>
+          <div>
+            <table class="compacta">
+              <tr><th>Os mesmos 19 vulneráveis</th><th class="num">R3<br>com o alerta</th><th class="num">R4<br>só o código</th></tr>
+              <tr><td>Especialista</td><td class="num">3</td><td class="num">3</td></tr>
+              <tr class="destaque"><td><b><em>Baseline</em></b></td><td class="num"><b>8</b></td><td class="num"><b style="color:var(--crit-text)">0</b></td></tr>
+            </table>
+            <p class="sub" style="margin-top:0.4em">Mesmo modelo, mesma semente, mesmos <em>templates</em> · muda só o contexto.</p>
+          </div>
+        </div>
+        <div class="hl" style="margin-top:0.7em"><b>O <em>baseline</em> lia a resposta no enunciado.</b> <span class="sub">Por isso, nas rodadas em que o especialista venceu, a vantagem medida tende a ser <b>menor que a real</b>. O especialista não se move, porque o sinal dele vem da ficha.</span></div>
+      </section>
+
+      <!-- ============ BACKUP: Q1 PERGUNTA E FICHAS ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Q1</p>
+        <h2>A forma da pergunta e das fichas também pesa</h2>
+        <div class="cols" style="margin-top:0.3em">
+          <div class="card">
+            <h3>Pergunta sobre o alerta × direta <span class="tag">R4 → R5</span></h3>
+            <p class="sub">Para quem não tem alerta, "o alerta é falso?" pode ser respondido com "sim" sem erro de detecção.</p>
+            <ul class="tight" style="font-size:0.66em; margin-top:0.4em">
+              <li><b><em>Recall</em> do especialista</b> na triagem de <b>1,3% para 5,1%</b></li>
+              <li><b>Nos injetados</b> de 0,92% para 4,47% · reproduz na reexecução</li>
+              <li><b>Vantagem do especialista</b> <i>p</i> = 0,009, mas 0,086 na reexecução · <b>só indício</b></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Fichas por CWE × por regra do Semgrep <span class="tag">R7</span></h3>
+            <p class="sub">Mesmo <em>recall</em> nos quatro cenários · a diferença está nos alarmes falsos.</p>
+            <table class="compacta" style="margin-top:0.3em">
+              <tr><th>Cenário</th><th class="num">Por CWE</th><th class="num">Por regra</th></tr>
+              <tr><td>qwen · triagem</td><td class="num"><b>39</b></td><td class="num">119</td></tr>
+              <tr><td>gemma · triagem</td><td class="num"><b>104</b></td><td class="num">210</td></tr>
+              <tr><td>qwen · filtro</td><td class="num"><b>12</b></td><td class="num">20</td></tr>
+              <tr><td>gemma · filtro</td><td class="num">171</td><td class="num"><b>69</b></td></tr>
+            </table>
+          </div>
+        </div>
+        <p class="sub" style="margin-top:0.6em">Por CWE vence 3 de 4 cenários e perde só onde a ficha descreve outra fraqueza (CWE-327) · <b>catálogo por CWE mantido</b> em todos os números.</p>
+      </section>
+
+      <!-- ============ BACKUP 1: MÉTRICAS ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Métricas</p>
+        <h2>Fórmulas</h2>
+        <table>
+          <tr class="formula-row"><td style="width:30%"><b>TRA</b></td><td>\(\mathrm{TRA} = \dfrac{VN + FN}{VP + VN + FP + FN}\)</td></tr>
+          <tr class="formula-row"><td><b>Precisão · <em>Recall</em> · TFN</b></td><td>\(P = \dfrac{VP}{VP + FP}\qquad R = \dfrac{VP}{VP + FN}\qquad \mathrm{TFN} = 1 - R\)</td></tr>
+          <tr class="formula-row"><td><b>MCC</b></td><td>\(\mathrm{MCC} = \dfrac{VP \cdot VN - FP \cdot FN}{\sqrt{\scriptstyle(VP{+}FP)(VP{+}FN)(VN{+}FP)(VN{+}FN)}}\)</td></tr>
+          <tr class="formula-row"><td><b>McNemar</b></td><td>\(\chi^2 = \dfrac{(|b - c| - 1)^2}{b + c}\) <span class="sub">— b e c são os casos em que só um dos <em>prompts</em> acerta</span></td></tr>
+          <tr class="formula-row"><td><b>J de Youden</b></td><td>\(J = R_{\text{injetados}} - \text{alarme}_{\text{seguros}}\) <span class="sub">— 0 é o acaso, 1 é perfeito</span></td></tr>
+        </table>
+        <p class="sub">O MCC usa as quatro células e não engana com 2,3% de vulneráveis. O McNemar usa todos os casos pareados, e não só os 19 vulneráveis.</p>
+      </section>
+
+      <!-- ============ BACKUP 3: H2 E H4 ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Teto de detecção</p>
+        <h2>Detalhes das hipóteses H2 e H4</h2>
+        <div class="cols">
+          <div class="card">
+            <h3>H2 · fluxo entre arquivos</h3>
+            <ul class="tight" style="font-size:0.66em">
+              <li><b>Semgrep Pro</b> — 5 casos com resultado, 0 novos · 2 a 5 vezes mais lento · 1 caso passou de 900 s</li>
+              <li><b>CodeQL</b> — 81 casos, 47 arquivos de 14 repositórios · 2 de 8 na CWE-22 e 1 de 29 na CWE-918</li>
+              <li><b>SonarQube</b> comunitário — sem regra de segurança para Go</li>
+              <li>44 de 47 arquivos <b>sem detecção nas três ferramentas</b></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>H4 · regras próprias</h3>
+            <ul class="tight" style="font-size:0.66em">
+              <li><b>Partição antes da primeira regra</b> — <em>commit</em> <code>18ce326</code>, grupos de desenvolvimento e de avaliação</li>
+              <li><b>Derivadas da definição</b> — 2 de 114 (CWE-22) e 1 de 112 (CWE-918)</li>
+              <li><b>Avaliação, todas as regras</b> — 4 de 60 e 1 de 57</li>
+              <li><b>Desenvolvimento</b> — 7,4% e 5,5% · na CWE-918 a regra descreve mais os casos vistos do que a fraqueza</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ BACKUP 5: GRANULARIDADE NA Q4 ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Q4</p>
+        <h2>O gabarito visto pela auditoria</h2>
+        <ul class="tight">
+          <li><b>Dois pares com o mesmo recorte, byte a byte</b> <span class="gloss">— vulnerável antes da correção e seguro depois · com temperatura 0, o modelo necessariamente erra um</span></li>
+          <li><b>12 alarmes falsos mantidos pelo especialista</b> <span class="gloss">— 6 de fato seguros, nenhum claramente vulnerável, 6 impossíveis de decidir só com a função</span></li>
+          <li><b>5 dos indecidíveis dependem de configuração fora da função</b> <span class="gloss">— o sexto tem uma montagem de caminho sem verificação, de outra CWE</span></li>
+          <li><b>Classe negativa aproximada</b> <span class="gloss">— o SastBench rotula como falso todo alerta sem a CWE da correção</span></li>
+        </ul>
+      </section>
+
+      <!-- ============ BACKUP: REFERÊNCIAS ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio</p>
+        <h2>Referências principais</h2>
+        <div class="refs">
+          <p><b>Johnson, B. et al.</b> Why don't software developers use static analysis tools to find bugs? <em>ICSE</em>, 2013.</p>
+          <p><b>Tu, T. et al.</b> Understanding real-world concurrency bugs in Go. <em>ASPLOS</em>, 2019.</p>
+          <p><b>Pearce, H. et al.</b> Asleep at the Keyboard? Assessing the Security of GitHub Copilot's Code Contributions. <em>IEEE S&amp;P</em>, 2022.</p>
+          <p><b>Croft, R.; Babar, M. A.; Kholoosi, M. M.</b> Data Quality for Software Vulnerability Datasets. <em>ICSE</em>, 2023.</p>
+          <p><b>Garcez, A. d'A.; Lamb, L. C.</b> Neurosymbolic AI: The 3rd Wave. <em>Artificial Intelligence Review</em>, 2023.</p>
+          <p><b>Bennett, G. et al.</b> Semgrep*: Improving the Limited Performance of SAST Tools. <em>EASE</em>, 2024.</p>
+          <p><b>Iranmanesh, M. et al.</b> ZeroFalse: Improving Precision in Static Analysis with LLMs. 2025.</p>
+          <p><b>Li, Z.; Dutta, S.; Naik, M.</b> IRIS: LLM-Assisted Static Analysis for Detecting Security Vulnerabilities. 2025.</p>
+          <p><b>Feiglin, J.; Dar, G.</b> SastBench: A Benchmark for Testing Agentic SAST Triage. 2026.</p>
+          <p><b>Huang, H. et al.</b> Finding Memory Leaks in C/C++ Programs via Neuro-Symbolic Augmented Static Analysis. 2026.</p>
+          <p><b>Wang, J. et al.</b> Bridging Coverage and Confidence: Reliable Static False Alarm Elimination via Input-Agnosticity. <em>PACMPL</em>, 2026.</p>
+          <p><b>Youden, W. J.</b> Index for Rating Diagnostic Tests. <em>Cancer</em>, 1950.</p>
+        </div>
+      </section>
+
+
+    </div>
+  </div>
+
+  <script src="vendor/reveal/reveal.js"></script>
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/contrib/auto-render.min.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280,
+      height: 720,
+      margin: 0.02,
+      center: false,
+      hash: true,
+      controls: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      slideNumber: 'c',
+      pdfMaxPagesPerSlide: 1
+    }).then(() => {
+      renderMathInElement(document.querySelector('.reveal .slides'), {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '\\(', right: '\\)', display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  </script>
+</body>
+</html>

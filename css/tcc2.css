@@ -1,0 +1,230 @@
+/* ==========================================================================
+   Complementos do tema para a apresentação do TCC 2
+   Usa as mesmas variáveis de css/tema.css (carregar depois dele)
+   ========================================================================== */
+
+:root {
+  --java: #a8a69f;
+  --java-ext: #d6d4ce;
+  --blue-ext: #9fc3ee;
+}
+
+/* grade de cartões */
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.grid3 .card, .grid2 .card { padding: 12px 16px; }
+.card h3 { font-size: 0.72em; margin-bottom: 0.25em; }
+.card .sub { font-size: 0.62em; line-height: 1.4; margin: 0; }
+.card.azul { border-color: var(--blue); background: var(--blue-tint); }
+.card.laranja { border-color: var(--orange); background: var(--orange-tint); }
+.card.verde { border-color: var(--good); background: var(--good-tint); }
+.card.vermelho { border-color: var(--crit); background: var(--crit-tint); }
+
+/* tabela sozinha no slide: letra maior */
+.reveal table.compacta.grande th, .reveal table.compacta.grande td { font-size: 0.7em; padding: 10px 14px; }
+.reveal table.compacta.grande tr.grupo td { font-size: 0.6em; }
+
+/* tabelas compactas */
+.reveal table.compacta th, .reveal table.compacta td { font-size: 0.54em; padding: 6px 10px; }
+.reveal table.compacta td.num, .reveal table.compacta th.num { text-align: center; font-variant-numeric: tabular-nums; }
+.reveal table.compacta tr.grupo td { background: var(--gray-tint); font-weight: 700; color: var(--ink-2); font-size: 0.5em; }
+.reveal table.compacta tr.destaque td { background: var(--blue-tint); }
+.reveal table td.antes { color: var(--muted); }
+.reveal table td.depois b { color: var(--blue-deep); }
+
+/* rótulos curtos */
+.tag {
+  display: inline-block;
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--ink-2);
+  background: var(--gray-tint);
+  border-radius: 6px;
+  padding: 0 7px;
+}
+.rej {
+  display: inline-block;
+  font-size: 0.5em;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--crit-text);
+  background: var(--crit-tint);
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+
+/* gráfico de barras horizontal (HTML) */
+.barras { display: flex; flex-direction: column; gap: 7px; margin: 0.3em 0; }
+.barras .linha { display: flex; align-items: center; gap: 10px; }
+.barras .rot { flex: 0 0 34%; text-align: right; font-size: 0.5em; color: var(--ink-2); line-height: 1.2; }
+.barras .rot b { color: var(--ink); font-weight: 650; }
+.barras .trilho { flex: 1; position: relative; height: 22px; border-left: 1px solid var(--hairline); }
+.barras .b { position: absolute; top: 2px; bottom: 2px; left: 0; border-radius: 0 4px 4px 0; }
+.barras .b.azul { background: var(--blue); }
+.barras .b.azul-ext { background: var(--blue-ext); }
+.barras .b.cinza { background: var(--java); }
+.barras .b.cinza-ext { background: var(--java-ext); }
+.barras .val { position: absolute; top: 50%; transform: translateY(-50%); font-size: 0.48em; color: var(--ink); white-space: nowrap; padding-left: 6px; font-variant-numeric: tabular-nums; }
+.barras .eixo { display: flex; margin-left: calc(34% + 10px); justify-content: space-between; font-size: 0.42em; color: var(--muted); border-top: 1px solid var(--hairline); padding-top: 3px; }
+.barras .sep { border-top: 1px dashed var(--hairline); margin: 2px 0 2px calc(34% + 10px); }
+
+/* legenda de cores dos gráficos */
+.chave { display: flex; gap: 18px; font-size: 0.46em; color: var(--ink-2); margin-top: 6px; justify-content: center; }
+.chave i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+
+/* funil */
+.funil { display: flex; flex-direction: column; gap: 10px; margin-top: 0.4em; }
+.funil .etapa { display: flex; align-items: center; gap: 14px; }
+.funil .nome { flex: 0 0 150px; text-align: right; font-size: 0.5em; font-weight: 700; color: var(--ink-2); line-height: 1.2; }
+.funil .nome span { display: block; font-weight: 400; color: var(--muted); }
+.funil .faixa { flex: 1; display: flex; height: 40px; gap: 2px; }
+.funil .seg {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.46em; border-radius: 4px; white-space: nowrap; overflow: visible;
+  color: var(--ink); box-sizing: border-box;
+}
+.funil .cinza { background: #e3e2dc; }
+.funil .verde { background: var(--good-tint); }
+.funil .vermelho { background: var(--crit-tint); }
+.funil .laranja { background: #f7c9b0; }
+.funil .vazio { background: transparent; border: 1px dashed #cfcdc6; color: var(--muted); }
+.funil .azul { background: var(--blue); color: #fff; }
+.funil .azul-fino { background: var(--blue); }
+
+/* código */
+.codigo {
+  background: #1e1e1c;
+  color: #e8e6dd;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.46em;
+  line-height: 1.5;
+  border-radius: 10px;
+  padding: 12px 16px;
+  white-space: pre;
+  margin: 0;
+}
+.codigo .add { color: #7ddc7d; }
+.codigo .realce { color: #ffd27a; font-weight: 700; }
+.codigo .dim { color: #9a988f; }
+.codigo-tit { font-size: 0.5em; font-weight: 700; color: var(--ink-2); margin: 0 0 5px 2px; }
+
+/* cadeia de hipóteses */
+.cadeia { list-style: none; margin: 0.3em 0 0 0 !important; padding: 0; }
+.cadeia li {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 9px 16px; margin: 0 0 8px 0; font-size: 0.6em;
+}
+.cadeia li .h { flex: 0 0 44px; font-weight: 800; color: var(--blue-deep); }
+.cadeia li .txt { flex: 1; line-height: 1.35; }
+.cadeia li .txt span { color: var(--ink-2); font-size: 0.9em; }
+.cadeia li.sobra { background: var(--warn-tint); border-color: var(--orange); }
+.cadeia li.sobra .h { color: var(--orange); }
+
+/* respostas */
+.resp { list-style: none; margin: 0.2em 0 0 0 !important; padding: 0; }
+.resp li { display: flex; gap: 16px; align-items: baseline; padding: 9px 4px; border-bottom: 1px solid var(--hairline); font-size: 0.66em; margin: 0; }
+.resp .q { flex: 0 0 auto; font-weight: 800; color: var(--blue-deep); background: var(--blue-tint); border-radius: 8px; padding: 1px 10px; min-width: 2.6em; text-align: center; }
+.resp .curta { flex: 0 0 25%; font-weight: 750; }
+.resp .det { flex: 1; color: var(--ink-2); font-size: 0.92em; line-height: 1.38; }
+
+/* números grandes menores que os do tema */
+.stats.menor .valor { font-size: 1.2em; }
+.stats.menor .rotulo { font-size: 0.52em; }
+.stat.azul .valor { color: var(--blue-deep); }
+
+/* gráfico de dispersão (SVG) */
+.disp text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.disp .grade { stroke: var(--hairline); stroke-width: 1; }
+.disp .eixo-t { font-size: 12px; fill: var(--muted); }
+.disp .eixo-n { font-size: 13px; fill: var(--ink-2); font-weight: 600; }
+.disp .ponto { fill: var(--blue); stroke: var(--surface); stroke-width: 2; }
+.disp .rot { font-size: 12.5px; fill: var(--ink); }
+.disp .ref { fill: var(--crit); }
+.disp .ref-l { stroke: var(--crit); stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.disp .ref-t { font-size: 12px; fill: var(--crit-text); }
+
+.mini-nota { font-size: 0.46em; color: var(--muted); margin-top: 6px; }
+
+/* títulos do TCC 2 são mais longos: menores e sem invadir o logo */
+.reveal h2 { font-size: 1.3em; padding-right: 190px; }
+
+.reveal p.mini-nota { color: var(--muted); }
+.reveal p.codigo-tit { color: var(--ink-2); }
+.reveal table.compacta th { white-space: nowrap; }
+
+/* prompt real, texto integral em duas colunas */
+.prompt-real { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.prompt-real .pcol { display: flex; flex-direction: column; gap: 5px; }
+.prompt-real .pb {
+  position: relative;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 10.5px; line-height: 1.32; white-space: pre-wrap; word-break: break-word;
+  tab-size: 4; font-variant-ligatures: none;
+  color: var(--ink); border-left: 4px solid; border-radius: 0 6px 6px 0;
+  padding: 5px 8px 5px 9px;
+}
+.prompt-real .pb.inst  { background: var(--gray-tint);   border-color: #b9b7b0; }
+.prompt-real .pb.ficha { background: var(--blue-tint);   border-color: var(--blue); }
+.prompt-real .pb.dado  { background: var(--orange-tint); border-color: var(--orange); }
+.prompt-real .pr {
+  position: absolute; top: 4px; right: 6px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink-2); background: rgba(255,255,255,0.75); border-radius: 4px; padding: 0 5px;
+}
+
+/* diagrama dos dois modos de execução */
+.reveal svg.modos { display: block; width: 100%; max-width: 100%; max-height: none; height: auto; margin: 1.4em 0 0 0; }
+.modos text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; text-anchor: middle; fill: var(--ink); }
+.modos .t1 { font-size: 22px; font-weight: 700; }
+.modos .t2 { font-size: 19px; fill: var(--ink-2); }
+.modos .t3 { font-size: 17px; font-weight: 700; }
+.modos .rot { font-size: 20px; fill: var(--ink-2); }
+.modos .cx.dec { fill: var(--orange-tint); stroke: #e5a27f; }
+.modos text.ini { text-anchor: start; }
+.modos .b { font-weight: 700; fill: var(--ink); }
+.modos .tri-t .b { fill: #b8461a; }
+.modos .cx { stroke: var(--border); stroke-width: 1; }
+.modos .cx.io { fill: var(--gray-tint); }
+.modos .cx.fase { fill: var(--blue-tint); }
+.modos .cx.llm { fill: var(--blue-tint); stroke: var(--blue); stroke-width: 1.5; }
+.modos .cx.fora { fill: transparent; stroke: #c9c7c0; stroke-dasharray: 5 4; }
+.modos .cx.tri { fill: var(--orange-tint); stroke: var(--orange); }
+.modos .s { stroke: var(--muted); stroke-width: 2; fill: none; }
+.modos .s-tri { stroke: var(--orange); stroke-width: 2.5; stroke-dasharray: 8 6; fill: none; }
+.modos .ponta { fill: var(--muted); }
+.modos .ponta-tri { fill: var(--orange); }
+.modos-leg { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: fit-content; font-size: 0.7em; color: var(--ink-2); margin: 1.2em auto 0.3em auto; }
+.modos-leg i { display: inline-block; width: 30px; height: 0; vertical-align: middle; margin-right: 8px; }
+.modos-leg i.cheia { border-top: 2.5px solid var(--muted); }
+.modos-leg i.tracejada { border-top: 2.5px dashed var(--orange); }
+
+/* prompt curto (baseline): uma coluna, letra maior */
+.prompt-real.uma { grid-template-columns: 1fr; max-width: 82%; margin: 0 auto; }
+.prompt-real.uma .pb { font-size: 12.5px; line-height: 1.3; padding: 6px 10px 6px 12px; }
+.prompt-real.uma .pr { font-size: 10.5px; }
+
+/* esteira com a Fase 5 (auditoria) pendurada na Fase 4 */
+.flow.com-auditoria { align-items: stretch; margin-bottom: 0; }
+.flow.com-auditoria .arr { align-self: center; }
+.flow .step.f4 { position: relative; }
+.flow .step.f4::after {
+  content: ""; position: absolute; left: 50%; top: 100%;
+  height: 24px; border-left: 2px dashed var(--muted);
+}
+.auditoria {
+  margin: 24px 0 0 auto; width: 52%; box-sizing: border-box;
+  border: 1.5px dashed var(--muted); border-radius: 10px;
+  background: var(--surface); padding: 8px 14px;
+  font-size: 0.58em; line-height: 1.3; text-align: center;
+}
+.auditoria b { display: block; font-size: 1.02em; }
+.auditoria .mini { display: block; color: var(--ink-2); font-size: 0.86em; margin-top: 2px; }
+
+/* respostas ao exemplo */
+.reveal p.veredito { font-size: 0.62em; font-weight: 800; margin: 0.4em 0 0.3em 0; }
+.reveal p.veredito.erro { color: var(--crit-text); }
+.reveal p.veredito.acerto { color: var(--good-text); }
+.reveal p.citacao { font-size: 0.56em; line-height: 1.42; color: var(--ink-2); font-style: italic; margin: 0; }
+.reveal p.citacao mark { background: #ffe9a8; color: var(--ink); font-style: normal; padding: 0 2px; border-radius: 3px; }
