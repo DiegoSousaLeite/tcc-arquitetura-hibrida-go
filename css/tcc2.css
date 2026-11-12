@@ -73,16 +73,23 @@
 .chave i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
 
 /* funil */
-.funil { display: flex; flex-direction: column; gap: 10px; margin-top: 0.4em; }
+.funil { display: flex; flex-direction: column; gap: 20px; margin-top: 0.4em; position: relative; }
 .funil .etapa { display: flex; align-items: center; gap: 14px; }
 .funil .nome { flex: 0 0 150px; text-align: right; font-size: 0.5em; font-weight: 700; color: var(--ink-2); line-height: 1.2; }
 .funil .nome span { display: block; font-weight: 400; color: var(--muted); }
-.funil .faixa { flex: 1; display: flex; height: 40px; gap: 2px; }
+.funil .faixa { flex: 1; display: flex; height: 40px; }
 .funil .seg {
   display: flex; align-items: center; justify-content: center;
   font-size: 0.46em; border-radius: 4px; white-space: nowrap; overflow: visible;
-  color: var(--ink); box-sizing: border-box;
+  color: var(--ink); box-sizing: border-box; flex: none;
 }
+/* o espaço entre segmentos é uma borda transparente, para as larguras somarem 100% exatos
+   e o tracejado cair na divisa certa */
+.funil .seg + .seg { border-left: 2px solid transparent; background-clip: padding-box; }
+.funil .seg + .seg.vazio { border-left: 1px dashed #cfcdc6; }
+/* tracejado entre as linhas, como na figura do funil no texto */
+.funil .tracos { position: absolute; left: 164px; right: 0; top: 0; bottom: 0; pointer-events: none; }
+.funil .tracos i { position: absolute; border-left: 1.5px dashed #9b998f; transform: translateX(-0.75px); }
 .funil .cinza { background: #e3e2dc; }
 .funil .verde { background: var(--good-tint); }
 .funil .vermelho { background: var(--crit-tint); }
@@ -228,3 +235,9 @@
 .reveal p.veredito.acerto { color: var(--good-text); }
 .reveal p.citacao { font-size: 0.56em; line-height: 1.42; color: var(--ink-2); font-style: italic; margin: 0; }
 .reveal p.citacao mark { background: #ffe9a8; color: var(--ink); font-style: normal; padding: 0 2px; border-radius: 3px; }
+
+/* a pergunta de pesquisa ao lado do kicker, nos slides de resultado */
+.kicker .kq {
+  margin-left: 0.9em; font-weight: 400; letter-spacing: 0; text-transform: none;
+  font-size: 1.12em; color: var(--muted);
+}

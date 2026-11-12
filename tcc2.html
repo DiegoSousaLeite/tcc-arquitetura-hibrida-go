@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="vendor/reveal/reveal.css">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="css/tema.css">
-  <link rel="stylesheet" href="css/tcc2.css?v=20261110f">
+  <link rel="stylesheet" href="css/tcc2.css?v=20261111d">
 </head>
 <body>
   <div class="reveal">
@@ -459,6 +459,13 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
               <div class="seg vazio" style="width:33.42%">fora do modelo</div>
             </div>
           </div>
+          <div class="tracos" aria-hidden="true">
+            <i style="left:0;top:100px;height:20px"></i>
+            <i style="left:100%;top:100px;height:20px"></i>
+            <i style="left:65.77%;top:100px;height:80px"></i>
+            <i style="left:34.71%;top:160px;height:20px"></i>
+            <i style="left:66.59%;top:160px;height:20px"></i>
+          </div>
         </div>
         <p class="mini-nota" style="text-align:center">A faixa azul estreita são os <b>19 vulneráveis detectados</b> · Rodada 3 · larguras proporcionais às contagens</p>
         <div class="stats menor" style="margin-top:0.5em">
@@ -470,7 +477,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 14. QUESTÃO GERAL ============ -->
       <section>
-        <p class="kicker">Resultados · Questão Geral</p>
+        <p class="kicker">Resultados · Questão Geral<span class="kq">Como reduzir a fadiga de alertas na avaliação da análise estática?</span></p>
         <h2>Como filtro, a pilha de alertas quase some</h2>
         <div class="stats">
           <div class="stat bom"><div class="valor">827 → 15</div><div class="rotulo">alertas a revisar com o <code>qwen2.5-coder:7b</code> e o especialista (Rodada 3)</div></div>
@@ -487,7 +494,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 15. Q1 POR MODELO ============ -->
       <section>
-        <p class="kicker">Resultados · Q1</p>
+        <p class="kicker">Resultados · Q1<span class="kq">Qual o impacto do enriquecimento semântico na precisão do LLM?</span></p>
         <h2>O efeito da ficha depende do modelo</h2>
         <p class="sub">Teste de McNemar no modo de filtro · conta só os casos em que os dois <em>prompts</em> discordam</p>
         <div class="grid3" style="margin-top:0.4em">
@@ -512,7 +519,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 18. Q2 FILTRO ============ -->
       <section>
-        <p class="kicker">Resultados · Q2</p>
+        <p class="kicker">Resultados · Q2<span class="kq">Em que proporção a arquitetura reduz falsos positivos sem introduzir falsos negativos?</span></p>
         <h2>No filtro, os vulneráveis vão junto com o ruído</h2>
         <table class="compacta">
           <tr><th>Modelo e <em>prompt</em> (modo de filtro)</th><th class="num">VP</th><th class="num">FN</th><th class="num">FP</th><th class="num"><em>Recall</em></th><th class="num">TRA</th><th class="num">MCC</th></tr>
@@ -531,7 +538,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 20. SUPRESSÃO ============ -->
       <section>
-        <p class="kicker">Resultados · Q2</p>
+        <p class="kicker">Resultados · Q2<span class="kq">Em que proporção a arquitetura reduz falsos positivos sem introduzir falsos negativos?</span></p>
         <h2>Supressão excessiva: reduzir a pilha descartando tudo</h2>
         <div class="cols" style="align-items:center">
           <div style="flex:1.05">
@@ -581,7 +588,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 20b. Q2 TRIAGEM ============ -->
       <section>
-        <p class="kicker">Resultados · Q2</p>
+        <p class="kicker">Resultados · Q2<span class="kq">Em que proporção a arquitetura reduz falsos positivos sem introduzir falsos negativos?</span></p>
         <h2>Na triagem, pouco do que o Semgrep perdeu volta</h2>
         <p class="sub"><em>Recall</em> sobre os 778 vulneráveis que o Semgrep não detectou (os <b>injetados</b>), com o especialista e a pergunta direta</p>
         <div class="stats" style="margin-top:0.5em">
@@ -598,7 +605,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 21. Q3 ============ -->
       <section>
-        <p class="kicker">Resultados · Q3</p>
+        <p class="kicker">Resultados · Q3<span class="kq">Como o desempenho se comporta nas fraquezas específicas de Go?</span></p>
         <h2>Por categoria, quem decide é o analisador</h2>
         <div class="cols" style="align-items:center">
           <div style="flex:1.1">
@@ -630,7 +637,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
 
       <!-- ============ 22. Q4 ============ -->
       <section>
-        <p class="kicker">Resultados · Q4</p>
+        <p class="kicker">Resultados · Q4<span class="kq">Como as regras de segurança no <em>prompt</em> influenciam o raciocínio do modelo?</span></p>
         <h2>A ficha influencia o raciocínio, nem sempre para melhor</h2>
         <div class="cols" style="align-items:flex-start">
           <div style="flex:0.85">
