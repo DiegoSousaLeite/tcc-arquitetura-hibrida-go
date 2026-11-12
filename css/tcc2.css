@@ -241,3 +241,16 @@
   margin-left: 0.9em; font-weight: 400; letter-spacing: 0; text-transform: none;
   font-size: 1.12em; color: var(--muted);
 }
+
+/* Q1: efeito da ficha por modelo */
+.reveal table.efeito td:first-child { font-weight: 700; color: var(--ink-2); text-align: left; }
+.reveal table.efeito .rot { display: block; font-size: 0.78em; font-weight: 400; color: var(--muted); }
+.reveal table.efeito .big { font-size: 1.35em; }
+.reveal table.efeito tr.veredito td.num { font-weight: 700; }
+.reveal table.efeito td.bom { color: var(--good-text); background: var(--good-tint); }
+.reveal table.efeito td.ruim { color: var(--crit-text); background: var(--crit-tint); }
+.reveal table.efeito td.neutro { color: var(--ink-2); background: var(--gray-tint); }
+.reveal table.efeito th.num { font-family: var(--mono, monospace); }
+.reveal table.efeito { table-layout: fixed; width: 100%; }
+.reveal table.efeito th:first-child { width: 34%; }
+.reveal table.efeito th.num { width: 22%; }

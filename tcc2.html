@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="vendor/reveal/reveal.css">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="css/tema.css">
-  <link rel="stylesheet" href="css/tcc2.css?v=20261111d">
+  <link rel="stylesheet" href="css/tcc2.css?v=20261111f">
 </head>
 <body>
   <div class="reveal">
@@ -496,25 +496,14 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
       <section>
         <p class="kicker">Resultados · Q1<span class="kq">Qual o impacto do enriquecimento semântico na precisão do LLM?</span></p>
         <h2>O efeito da ficha depende do modelo</h2>
-        <p class="sub">Teste de McNemar no modo de filtro · conta só os casos em que os dois <em>prompts</em> discordam</p>
-        <div class="grid3" style="margin-top:0.4em">
-          <div class="card verde">
-            <h3 style="color:var(--good-text)">qwen2.5-coder:7b · ajuda</h3>
-            <p class="sub"><b style="font-size:1.6em">104 × 5</b><br>casos em que só o especialista acerta × só o <em>baseline</em> acerta · <i>p</i> &lt; 0,0001</p>
-            <p class="sub" style="margin-top:0.4em">alarmes falsos de <b>116 para 12</b></p>
-          </div>
-          <div class="card vermelho">
-            <h3 style="color:var(--crit-text)">gemma2:9b · atrapalha</h3>
-            <p class="sub"><b style="font-size:1.6em">49 × 96</b><br>a vantagem se inverte · <i>p</i> = 0,0001</p>
-            <p class="sub" style="margin-top:0.4em">alarmes falsos de <b>127 para 173</b>, concentrados na CWE-327</p>
-          </div>
-          <div class="card">
-            <h3>gpt-6-luna · instável</h3>
-            <p class="sub"><b style="font-size:1.6em"><i>p</i> = 0,032 · 0,227</b><br>significativo numa execução e não na outra</p>
-            <p class="sub" style="margin-top:0.4em">na triagem, o especialista vence nas duas (189 × 110 e 187 × 105)</p>
-          </div>
-        </div>
-        <div class="hl" style="margin-top:0.7em"><b>Por que a CWE-327 piora:</b> <span class="sub">a ficha trata de <em>hash</em> fraco em senha, mas os alertas apontam TLS sem versão mínima, e o modelo mistura os dois perigos</span></div>
+        <table class="compacta grande efeito">
+          <tr><th></th><th class="num">qwen2.5-coder:7b</th><th class="num">gemma2:9b</th><th class="num">gpt-6-luna</th></tr>
+          <tr class="veredito"><td>Efeito da ficha</td><td class="num bom">ajuda</td><td class="num ruim">atrapalha</td><td class="num neutro">instável</td></tr>
+          <tr><td>Alarmes falsos<span class="rot">baseline → especialista</span></td><td class="num"><b class="big">116 → 12</b></td><td class="num"><b class="big">127 → 173</b></td><td class="num">sem diferença estável</td></tr>
+          <tr><td>Teste de McNemar<span class="rot">só o especialista acerta × só o baseline acerta</span></td><td class="num">104 × 5<span class="rot"><i>p</i> &lt; 0,0001</span></td><td class="num">49 × 96<span class="rot"><i>p</i> = 0,0001</span></td><td class="num"><i>p</i> = 0,032 e 0,227<span class="rot">um em cada execução</span></td></tr>
+        </table>
+        <div class="hl" style="margin-top:0.6em"><b>Por que o gemma e o luna pioram na CWE-327:</b> <span class="sub">a ficha trata de <em>hash</em> fraco em senha, mas os alertas apontam TLS sem versão mínima, e o modelo mistura os dois perigos · no luna, nessa CWE, 19 → 57 | 20 → 54 alarmes falsos nas duas execuções</span></div>
+        <p class="mini-nota" style="text-align:center">Modo de filtro, 827 alertas · na triagem, o especialista do <code>gpt-6-luna</code> vence nas duas execuções (<i>p</i> &lt; 0,0001)</p>
       </section>
 
       <!-- ============ 18. Q2 FILTRO ============ -->
