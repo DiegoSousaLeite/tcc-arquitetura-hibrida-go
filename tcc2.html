@@ -616,9 +616,9 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           </div>
           <div style="flex:0.9">
             <ul class="tight" style="font-size:0.8em">
-              <li><b>Detecta o que cabe numa linha</b> <span class="gloss">— a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
-              <li><b>Falha no que depende do caminho do dado</b> <span class="gloss">— CWE-400, 22, 918 e 200 somam 442 pares e 1 detecção</span></li>
-              <li><b>A acurácia por CWE mede o ruído</b> <span class="gloss">— no XSS, 96,2% são só os 128 seguros entre 133 alertas</span></li>
+              <li><b>A acurácia do modelo por CWE não mede o modelo</b> <span class="gloss">— no XSS, os 96,2% vêm de descartar tudo, porque 128 dos 133 alertas são seguros. Na injeção de SQL, o especialista descartou as 7 detecções</span></li>
+              <li><b>Então quem decide é o que o Semgrep detecta</b> <span class="gloss">— e ele detecta o que cabe numa linha, como a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
+              <li><b>E falha quando o perigo está na origem do dado</b> <span class="gloss">— <code>os.Open(filepath.Join(base, entrada))</code> é igual na versão segura e na vulnerável · CWE-400, 22, 918 e 200 somam 442 pares e 1 detecção</span></li>
               <li><b>Concorrência sem instrumento</b> <span class="gloss">— 11 casos de condição de corrida (CWE-362) e <b>nenhum detectado</b></span></li>
             </ul>
           </div>
