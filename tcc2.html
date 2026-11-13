@@ -618,7 +618,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <div style="flex:0.9">
             <ul class="tight" style="font-size:0.8em">
               <li><b>A acurácia do modelo por CWE engana</b> <span class="gloss">— no XSS, ele descarta os 133 alertas e ainda marca 96,2%, porque 128 eram seguros. Perde os 5 vulneráveis do gráfico, e na injeção de SQL perde os 7</span></li>
-              <li><b>Então quem decide é o Semgrep</b> <span class="gloss">— ele detecta o que cabe numa linha, como a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
+              <li><b>Então quem decide é o Semgrep, e ele só vê o que tem formato reconhecível</b> <span class="gloss">— como a consulta SQL montada com <code>fmt.Sprintf</code>, que muda de cara quando é corrigida</span></li>
               <li><b>E falha quando o perigo depende de onde vem o dado</b> <span class="gloss">— <code>os.Open(filepath.Join(base, entrada))</code> é igual no código seguro e no vulnerável. CWE-400, 22, 918 e 200 têm 442 pares e 1 detecção</span></li>
               <li><b>A parte própria de Go ficou sem instrumento</b> <span class="gloss">— nenhum dos 11 casos de condição de corrida (CWE-362) foi detectado. Na triagem, os locais reconhecem no máximo 2</span></li>
             </ul>
