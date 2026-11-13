@@ -580,14 +580,14 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
       <section>
         <p class="kicker">Resultados · Q2<span class="kq">Em que proporção a arquitetura reduz falsos positivos sem introduzir falsos negativos?</span></p>
         <h2>Na triagem, pouco do que o Semgrep perdeu volta</h2>
-        <p class="sub"><em>Recall</em> sobre os 778 vulneráveis que o Semgrep não detectou (os <b>injetados</b>), com o especialista e a pergunta direta</p>
+        <p class="sub">Dos <b>778 vulneráveis que o Semgrep não detectou</b>, quantos o modelo reconhece quando recebe o código direto? <span style="color:var(--muted)">(especialista com a pergunta direta)</span></p>
         <div class="stats" style="margin-top:0.5em">
           <div class="stat ruim"><div class="valor">4,3–7,4%</div><div class="rotulo">modelos locais · <code>qwen2.5-coder:7b</code> e <code>gemma2:9b</code></div></div>
           <div class="stat"><div class="valor">≈ 17%</div><div class="rotulo"><code>gpt-6-luna</code> sem raciocínio · duas execuções</div></div>
           <div class="stat azul"><div class="valor">33–39%</div><div class="rotulo"><code>gpt-6-luna</code> com raciocínio · esforço baixo e alto</div></div>
         </div>
         <ul class="tight" style="margin-top:0.7em">
-          <li><b>O valor mais alto é do <em>baseline</em> com esforço alto, 51,4%</b> <span class="gloss">— mas ele alarma em 44,3% dos alertas seguros</span></li>
+          <li><b>O maior valor, 51,4%, é do <em>baseline</em> do gpt-6-luna com raciocínio alto</b> <span class="gloss">— mas ele alarma em 44,3% dos casos seguros</span></li>
           <li><b>E os números são otimistas</b> <span class="gloss">— o modelo recebe a CWE e o trecho apontados pelo gabarito, o que não existiria em produção</span></li>
         </ul>
         <div class="hl hl-warn" style="margin-top:0.5em"><b>Mesmo na configuração que mais recupera, metade dos casos perdidos continua perdida.</b></div>
