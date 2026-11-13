@@ -599,7 +599,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <h2>Por categoria, quem decide é o analisador</h2>
         <div class="cols" style="align-items:center">
           <div style="flex:1.1">
-            <p class="codigo-tit" style="text-align:center">Detecção do Semgrep por CWE, em pares vulnerável/corrigido</p>
+            <p class="codigo-tit" style="text-align:center">Detecção do Semgrep por CWE em código Go, em pares vulnerável/corrigido</p>
             <div class="barras">
               <div class="linha"><div class="rot"><b>CWE-89</b> injeção de SQL</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:97.25%" title="7 de 18"></div><span class="val" style="left:97.25%">38,9% (7/18)</span></div></div>
               <div class="linha"><div class="rot"><b>CWE-601</b> redirecionamento</div><div class="trilho" style="margin-right:90px"><div class="b azul" style="width:75%" title="3 de 10"></div><span class="val" style="left:75%">30,0% (3/10)</span></div></div>
@@ -613,13 +613,14 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
               <div class="linha"><div class="rot"><b>CWE-400</b> consumo de recursos</div><div class="trilho" style="margin-right:90px"><span class="val" style="left:0">0% (0/124)</span></div></div>
               <div class="eixo" style="margin-right:90px"><span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>40%</span></div>
             </div>
+            <p class="mini-nota" style="text-align:center">Fraquezas gerais, não exclusivas de Go. A parte própria de Go, a concorrência, está no último ponto</p>
           </div>
           <div style="flex:0.9">
             <ul class="tight" style="font-size:0.8em">
               <li><b>A acurácia do modelo por CWE não mede o modelo</b> <span class="gloss">— no XSS, os 96,2% vêm de descartar tudo, porque 128 dos 133 alertas são seguros. Na injeção de SQL, o especialista descartou as 7 detecções</span></li>
               <li><b>Então quem decide é o que o Semgrep detecta</b> <span class="gloss">— e ele detecta o que cabe numa linha, como a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
               <li><b>E falha quando o perigo está na origem do dado</b> <span class="gloss">— <code>os.Open(filepath.Join(base, entrada))</code> é igual na versão segura e na vulnerável · CWE-400, 22, 918 e 200 somam 442 pares e 1 detecção</span></li>
-              <li><b>Concorrência sem instrumento</b> <span class="gloss">— 11 casos de condição de corrida (CWE-362) e <b>nenhum detectado</b></span></li>
+              <li><b>A fraqueza própria de Go ficou sem instrumento</b> <span class="gloss">— 11 casos de condição de corrida (CWE-362) e <b>nenhum detectado</b> pelo Semgrep. Na triagem, os locais reconhecem 2 de 11 ou menos</span></li>
             </ul>
           </div>
         </div>
