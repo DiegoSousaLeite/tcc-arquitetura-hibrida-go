@@ -630,22 +630,24 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
       <section>
         <p class="kicker">Resultados · Q4<span class="kq">Como as regras de segurança no <em>prompt</em> influenciam o raciocínio do modelo?</span></p>
         <h2>A ficha influencia o raciocínio, nem sempre para melhor</h2>
-        <div class="cols" style="align-items:flex-start">
+        <p class="sub">Lemos a justificativa de cada veredito em 25 casos, nos dois <em>prompts</em> (50 justificativas)</p>
+        <div class="cols" style="align-items:flex-start; margin-top:0.4em">
           <div style="flex:0.85">
             <table class="compacta">
-              <tr><th><em>Prompt</em></th><th class="num">Fundada</th><th class="num" style="white-space:normal">Motivo errado</th><th class="num">Alucinação</th><th class="num" style="white-space:normal">Acertos fundados</th></tr>
+              <tr><th><em>Prompt</em></th><th class="num">Fundada</th><th class="num" style="white-space:normal">Motivo errado</th><th class="num">Alucinação</th><th class="num" style="white-space:normal">Acertos com justificativa fundada</th></tr>
               <tr><td><em>Baseline</em></td><td class="num">2</td><td class="num">22</td><td class="num">1</td><td class="num">1 de 4</td></tr>
               <tr class="destaque"><td>Especialista</td><td class="num">4</td><td class="num">18</td><td class="num">3</td><td class="num">4 de 8</td></tr>
             </table>
-            <p class="mini-nota">25 casos lidos nos dois <em>prompts</em> · Rodada 3 · critério registrado antes do sorteio · classificação não cega, feita pelos autores</p>
-            <div class="hl" style="margin-top:0.6em; font-size:0.7em"><b>Só 6 de 50 justificativas se apoiam no código.</b> Quando a heurística se aplica, o modelo a segue e acerta pelo motivo certo, como no MD5 e no <code>math/rand</code> usados fora de criptografia.</div>
+            <p class="mini-nota"><b>Fundada</b> = apoiada no código · <b>Motivo errado</b> = não sustenta o veredito · <b>Alucinação</b> = afirma algo que não está no código</p>
+            <p class="mini-nota">Rodada 3 · critério registrado antes do sorteio · classificação não cega, feita pelos autores</p>
+            <div class="hl" style="margin-top:0.6em; font-size:0.7em"><b>Só 6 de 50 justificativas se apoiam no código.</b> Boa parte do descarte vem de uma tendência a descartar, e não da leitura do código.</div>
           </div>
           <div style="flex:1.15">
             <div class="grid2">
-              <div class="card"><h3>Repete a mensagem do alerta</h3><p class="sub">Diz que o <em>cookie</em> não tem <code>Secure</code> quando o código o define a partir de <code>isTLS(r)</code>.</p></div>
-              <div class="card"><h3>Copia o exemplo da ficha</h3><p class="sub">Justifica um caso de <code>exec.Command</code> com a frase do exemplo de <em>template</em> da CWE-94.</p></div>
-              <div class="card"><h3>Raciocínio certo, veredito oposto</h3><p class="sub">Descreve o TLS como boa prática e responde "verdadeiro positivo".</p></div>
-              <div class="card laranja"><h3>Recorte idêntico, rótulos opostos</h3><p class="sub">A correção mexeu em outra função, e o modelo recebe o mesmo trecho nas duas versões.</p></div>
+              <div class="card verde"><h3 style="color:var(--good-text)">Quando ajuda, segue a heurística</h3><p class="sub">No MD5 e no <code>math/rand</code> usados fora de criptografia, descarta pelo motivo certo.</p></div>
+              <div class="card"><h3>Repete a mensagem do alerta</h3><p class="sub">Diz que o <em>cookie</em> não tem <code>Secure</code>, mas o código define <code>Secure</code> a partir de <code>isTLS(r)</code>.</p></div>
+              <div class="card"><h3>Copia o exemplo em vez de aplicar</h3><p class="sub">Num <code>exec.Command</code>, repete a frase da ficha de CWE-94, escrita para <em>templates</em>.</p></div>
+              <div class="card"><h3>Raciocínio certo, veredito oposto</h3><p class="sub">Descreve a configuração TLS como boa prática e mesmo assim diz "vulnerável".</p></div>
             </div>
           </div>
         </div>
