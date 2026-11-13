@@ -617,10 +617,10 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           </div>
           <div style="flex:0.9">
             <ul class="tight" style="font-size:0.8em">
-              <li><b>A acurácia do modelo por CWE não mede o modelo</b> <span class="gloss">— no XSS, os 96,2% vêm de descartar tudo, porque 128 dos 133 alertas são seguros. Na injeção de SQL, o especialista descartou as 7 detecções</span></li>
-              <li><b>Então quem decide é o que o Semgrep detecta</b> <span class="gloss">— e ele detecta o que cabe numa linha, como a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
-              <li><b>E falha quando o perigo está na origem do dado</b> <span class="gloss">— <code>os.Open(filepath.Join(base, entrada))</code> é igual na versão segura e na vulnerável · CWE-400, 22, 918 e 200 somam 442 pares e 1 detecção</span></li>
-              <li><b>A fraqueza própria de Go ficou sem instrumento</b> <span class="gloss">— 11 casos de condição de corrida (CWE-362) e <b>nenhum detectado</b> pelo Semgrep. Na triagem, os locais reconhecem 2 de 11 ou menos</span></li>
+              <li><b>A acurácia do modelo por CWE engana</b> <span class="gloss">— no XSS, ele descarta os 133 alertas e ainda marca 96,2%, porque 128 eram seguros. Perde os 5 vulneráveis do gráfico, e na injeção de SQL perde os 7</span></li>
+              <li><b>Então quem decide é o Semgrep</b> <span class="gloss">— ele detecta o que cabe numa linha, como a consulta SQL montada com <code>fmt.Sprintf</code></span></li>
+              <li><b>E falha quando o perigo depende de onde vem o dado</b> <span class="gloss">— <code>os.Open(filepath.Join(base, entrada))</code> é igual no código seguro e no vulnerável. CWE-400, 22, 918 e 200 têm 442 pares e 1 detecção</span></li>
+              <li><b>A parte própria de Go ficou sem instrumento</b> <span class="gloss">— nenhum dos 11 casos de condição de corrida (CWE-362) foi detectado. Na triagem, os locais reconhecem no máximo 2</span></li>
             </ul>
           </div>
         </div>
