@@ -588,7 +588,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         </div>
         <ul class="tight" style="margin-top:0.7em">
           <li><b>O maior valor, 51,4%, é do <em>baseline</em> do gpt-6-luna com raciocínio alto</b> <span class="gloss">— mas ele alarma em 44,3% dos casos seguros</span></li>
-          <li><b>E os números são otimistas</b> <span class="gloss">— o modelo recebe a CWE e o trecho apontados pelo gabarito, o que não existiria em produção</span></li>
+          <li><b>E os números são otimistas</b> <span class="gloss">— sem alerta, a CWE e o trecho vêm do gabarito. Em produção, esses casos nem chegariam ao modelo</span></li>
         </ul>
         <div class="hl hl-warn" style="margin-top:0.5em"><b>Mesmo na configuração que mais recupera, metade dos casos perdidos continua perdida.</b></div>
       </section>
