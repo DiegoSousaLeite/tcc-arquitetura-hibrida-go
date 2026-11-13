@@ -519,10 +519,10 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <tr><td><code>gpt-6-luna</code> · <em>baseline</em></td><td class="num">9</td><td class="num">10</td><td class="num">240 | 242</td><td class="num">47,4%</td><td class="num">69,6% | 69,4%</td><td class="num">+0,057 | +0,056</td></tr>
           <tr><td><code>gpt-6-luna</code> · especialista</td><td class="num">10 | 12</td><td class="num">9 | 7</td><td class="num">269 | 262</td><td class="num">52,6% | 63,2%</td><td class="num">66,1% | 66,7%</td><td class="num">+0,061 | +0,097</td></tr>
         </table>
-        <p class="mini-nota">19 vulneráveis em 827 alertas · gemma sobre 822 vereditos válidos · luna em duas execuções (1ª | 2ª), sobre 820 e 822 casos em comum com os locais</p>
+        <p class="mini-nota">19 vulneráveis em 827 alertas · no luna, 1ª | 2ª execução</p>
         <ul class="tight" style="margin-top:0.5em">
-          <li><b>Locais descartam mais da metade dos 19</b> <span class="gloss">— o comercial perde de um terço a metade, mas mantém de 240 a 269 alarmes falsos, contra 12 do especialista do qwen</span></li>
-          <li><b>Com 19 casos, <em>recall</em> e MCC mostram só a ordem de grandeza</b> <span class="gloss">— o lado seguro, com 808 alertas, é o que se sustenta</span></li>
+          <li><b>Os locais descartam de 11 a 16 dos 19 vulneráveis</b> <span class="gloss">— o luna descarta de 7 a 10, mas mantém de 240 a 269 alarmes falsos, contra 12 do especialista do qwen</span></li>
+          <li><b>Com só 19 vulneráveis, <em>recall</em> e MCC oscilam muito</b> <span class="gloss">— o especialista do luna, rodado duas vezes, vai de 52,6% a 63,2% de <em>recall</em> com 2 casos de diferença. O que se sustenta são os alarmes falsos, medidos sobre 808 alertas</span></li>
         </ul>
       </section>
 
