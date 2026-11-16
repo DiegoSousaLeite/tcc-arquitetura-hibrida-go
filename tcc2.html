@@ -644,7 +644,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           </div>
           <div style="flex:1.15">
             <div class="grid2">
-              <div class="card verde"><h3 style="color:var(--good-text)">Quando ajuda, segue a heurística</h3><p class="sub">No MD5 e no <code>math/rand</code> usados fora de criptografia, descarta pelo motivo certo.</p></div>
+              <div class="card verde"><h3 style="color:var(--good-text)">Quando ajuda, aplica o critério da ficha</h3><p class="sub">MD5 numa chave de <em>cache</em> e <code>math/rand</code> num tempo de expiração não são criptografia, e o modelo descarta o alerta por esse motivo.</p></div>
               <div class="card"><h3>Repete a mensagem do alerta</h3><p class="sub">Diz que o <em>cookie</em> não tem <code>Secure</code>, mas o código define <code>Secure</code> a partir de <code>isTLS(r)</code>.</p></div>
               <div class="card"><h3>Copia o exemplo em vez de aplicar</h3><p class="sub">Num <code>exec.Command</code>, repete a frase da ficha de CWE-94, escrita para <em>templates</em>.</p></div>
               <div class="card"><h3>Raciocínio certo, veredito oposto</h3><p class="sub">Descreve a configuração TLS como boa prática e mesmo assim diz "vulnerável".</p></div>
