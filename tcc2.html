@@ -658,8 +658,8 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <p class="kicker">Resultados · Modelos</p>
         <h2>Trocar o modelo muda os números, não as conclusões</h2>
         <div class="cols" style="align-items:center">
-          <div style="flex:1.15">
-            <p class="codigo-tit"><code>gpt-6-luna</code> no modo de triagem, pergunta direta</p>
+          <div style="flex:1">
+            <p class="codigo-tit"><code>gpt-6-luna</code> na triagem, com e sem raciocínio</p>
             <table class="compacta">
               <tr><th><em>Prompt</em> e raciocínio</th><th class="num"><em>Recall</em> injetados</th><th class="num">Alarme em seguros</th><th class="num">J</th></tr>
               <tr><td>especialista · sem</td><td class="num">17,1–17,3%</td><td class="num">10,2–10,5%</td><td class="num">+0,07</td></tr>
@@ -668,16 +668,16 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
               <tr><td><em>baseline</em> · sem</td><td class="num">17,6–18,0%</td><td class="num">20,2–20,5%</td><td class="num">≈ 0</td></tr>
               <tr><td><em>baseline</em> · alto</td><td class="num">51,4%</td><td class="num">44,3%</td><td class="num">+0,07</td></tr>
             </table>
-            <p class="mini-nota">J de Youden = <em>recall</em> nos injetados − alarme nos seguros · 0 é o acaso · separa "reconhece melhor" de "alarma mais"</p>
+            <p class="mini-nota">sem = raciocínio desligado · baixo e alto = esforço do raciocínio · J = <em>recall</em> nos injetados − alarme nos seguros, e 0 é o acaso</p>
           </div>
-          <div style="flex:0.85">
+          <div style="flex:1">
             <ul class="tight" style="font-size:0.8em">
-              <li><b>Melhor filtro é o menor</b> <span class="gloss">— <code>qwen2.5-coder:7b</code>, especializado em código</span></li>
-              <li><b>Maior não é melhor</b> <span class="gloss">— no filtro, com o especialista, 176 × 16 casos a favor do qwen contra o gemma2:9b</span></li>
-              <li><b>O comercial é o melhor na triagem</b> <span class="gloss">— e o raciocínio baixo é a <b>única melhora real de discriminação</b></span></li>
-              <li><b>Esforço alto só alarma mais</b> <span class="gloss">— o J fica igual</span></li>
+              <li><b>No filtro, o qwen continua o melhor</b> <span class="gloss">— o gemma2:9b perde por 176 × 16 casos com o especialista, e o luna mantém de 240 a 269 alarmes falsos</span></li>
+              <li><b>Na triagem, o comercial recupera mais</b> <span class="gloss">— cerca de 17% dos injetados, contra 4% a 7% dos locais</span></li>
+              <li><b>O raciocínio baixo melhora a discriminação</b> <span class="gloss">— o J sobe de +0,07 para +0,18. No esforço alto, o modelo só alarma mais, e o J fica igual</span></li>
             </ul>
-            <p class="mini-nota">Comercial: κ de Cohen de 0,935 a 0,969 entre execuções · US$ 1,15 + US$ 1,92</p>
+            <div class="hl" style="margin-top:0.5em; font-size:0.68em"><b>Em nenhum modelo o LLM recupera a maior parte do que o Semgrep perde.</b> O que muda é quanto.</div>
+            <p class="mini-nota">O gemma2:9b difere do qwen em família, especialização e quantização, e não só no tamanho · κ de Cohen de 0,935 a 0,969 entre execuções · US$ 1,15 + US$ 1,92</p>
           </div>
         </div>
       </section>
