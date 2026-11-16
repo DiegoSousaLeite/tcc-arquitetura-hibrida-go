@@ -685,15 +685,16 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
       <!-- ============ 23. TETO DE DETECÇÃO ============ -->
       <section>
         <p class="kicker">Resultados · Teto de detecção</p>
-        <h2>Por que a detecção não cede</h2>
-        <p class="sub">Coletar mais não ajudou · 257 pares deram 4,28% e a OSV inteira, 2,61% (só CWEs com regra para Go)</p>
+        <h2>Por que o Semgrep detecta só 2,6% dos vulneráveis</h2>
+        <p class="sub">18 de 690 casos vulneráveis, contando só as CWEs com regra para Go. E coletar mais não ajudou — a primeira coleta, de 257 pares, deu 4,28%, e a OSV inteira, 2,61%</p>
         <ol class="cadeia">
-          <li><span class="h">H1</span><span class="txt"><b>O conjunto de regras era o errado</b><br><span>o <code>p/golang</code> tem 42 regras Go contra 84 do <code>p/default</code> e perdia 97 alertas</span></span><span class="rej">REJEITADA</span></li>
-          <li><span class="h">H2</span><span class="txt"><b>Faltava analisar o fluxo entre arquivos</b><br><span>Semgrep Pro com 0 detecções novas em 5 casos · CodeQL recuperou 3 de 47 arquivos</span></span><span class="rej">REJEITADA</span></li>
+          <li><span class="h">H1</span><span class="txt"><b>O conjunto de regras era o errado</b><br><span>o conjunto específico para Go, <code>p/golang</code>, tem 42 regras contra 84 do <code>p/default</code>, e deixava de gerar 97 alertas</span></span><span class="rej">REJEITADA</span></li>
+          <li><span class="h">H2</span><span class="txt"><b>Faltava analisar o fluxo entre arquivos</b><br><span>Semgrep Pro sem detecção nova em 5 casos · CodeQL recuperou 3 de 47 arquivos, e explica só uma parte pequena</span></span><span class="rej">REJEITADA</span></li>
           <li><span class="h">H3</span><span class="txt"><b>Faltava regra em outro conjunto público</b><br><span><code>p/gosec</code>, <code>p/trailofbits</code> e <code>p/security-audit</code> sem regra Go nova para CWE-22 ou CWE-918</span></span><span class="rej">REJEITADA</span></li>
-          <li><span class="h">H4</span><span class="txt"><b>Faltava regra própria</b><br><span>casos divididos antes, em <em>commit</em> registrado · 6,7% (CWE-22) e 1,8% (CWE-918) no grupo de avaliação</span></span><span class="rej">REJEITADA</span></li>
-          <li class="sobra"><span class="h">→</span><span class="txt"><b>O que sobra está no gabarito, não no analisador</b><br><span>o rótulo é por arquivo, e muitas vezes a operação perigosa nem está no arquivo rotulado</span></span></li>
+          <li><span class="h">H4</span><span class="txt"><b>Faltava regra própria</b><br><span>regras escritas por nós e medidas em casos separados antes de escrevê-las · detectaram 6,7% (CWE-22) e 1,8% (CWE-918)</span></span><span class="rej">REJEITADA</span></li>
+          <li class="sobra"><span class="h">→</span><span class="txt"><b>O que mais limita está no gabarito, não no analisador</b><br><span>o rótulo é por arquivo, e muitas vezes a operação perigosa nem está no arquivo rotulado</span></span></li>
         </ol>
+        <p class="mini-nota">H2 a H4 testadas nas duas maiores categorias que dependem do caminho do dado, CWE-22 (caminho de arquivo) e CWE-918 (requisição forjada pelo servidor)</p>
       </section>
 
       <!-- ============ 23b. GRANULARIDADE DO RÓTULO ============ -->
