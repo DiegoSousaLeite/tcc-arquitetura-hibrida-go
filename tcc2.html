@@ -686,7 +686,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
       <section>
         <p class="kicker">Resultados · Teto de detecção</p>
         <h2>Por que o Semgrep detecta só 2,6% dos vulneráveis</h2>
-        <p class="sub">18 de 690 casos vulneráveis, contando só as CWEs com regra para Go. E coletar mais não ajudou — a primeira coleta, de 257 pares, deu 4,28%, e a OSV inteira, 2,61%</p>
+        <p class="sub">18 de 690 vulneráveis nas CWEs que têm regra para Go (19 de 797 contando todas). E coletar mais não ajudou — a primeira coleta, de 257 pares, deu 4,28%, e a OSV inteira, 2,61%</p>
         <ol class="cadeia">
           <li><span class="h">H1</span><span class="txt"><b>O conjunto de regras era o errado</b><br><span>o conjunto específico para Go, <code>p/golang</code>, tem 42 regras contra 84 do <code>p/default</code>, e deixava de gerar 97 alertas</span></span><span class="rej">REJEITADA</span></li>
           <li><span class="h">H2</span><span class="txt"><b>Faltava analisar o fluxo entre arquivos</b><br><span>Semgrep Pro sem detecção nova em 5 casos · CodeQL recuperou 3 de 47 arquivos, e explica só uma parte pequena</span></span><span class="rej">REJEITADA</span></li>
