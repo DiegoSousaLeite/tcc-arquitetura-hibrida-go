@@ -727,7 +727,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
               <tr><td>Só atrás de abstração (<code>afero</code>, <code>fs.FS</code>)</td><td class="num">19,3%</td><td class="num">30,4%</td></tr>
               <tr class="destaque"><td><b>Não está no arquivo</b></td><td class="num"><b>25,4%</b></td><td class="num"><b>48,2%</b></td></tr>
             </table>
-            <p class="mini-nota">abstração = biblioteca que imita o sistema de arquivos (<code>afero</code>) ou interface genérica (<code>fs.FS</code>), que a regra da biblioteca padrão não reconhece · em 109 desses casos, também lemos de onde vem o dado, e só 5,6% (CWE-22) e 14,5% (CWE-918) têm no mesmo arquivo a leitura do parâmetro HTTP e a operação perigosa, que é o que uma regra de um arquivo só precisa ver</p>
+            <p class="mini-nota">abstração = biblioteca que imita o sistema de arquivos (<code>afero</code>) ou interface genérica (<code>fs.FS</code>) · em 109 desses casos, só 5,6% (CWE-22) e 14,5% (CWE-918) têm a entrada do usuário e a operação perigosa no mesmo arquivo</p>
             <div class="hl" style="margin-top:0.6em; font-size:0.7em">Nenhuma regra encontra num arquivo algo que não está nele. <b>Parte da baixa detecção é limite da medição</b>, propriedade conhecida das bases montadas a partir de <em>commits</em> de correção <span style="color:var(--muted)">(Croft et al., 2023)</span>, aqui medida para Go.</div>
           </div>
         </div>
