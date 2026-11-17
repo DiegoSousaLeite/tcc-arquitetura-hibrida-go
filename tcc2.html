@@ -825,10 +825,10 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <p class="kicker">Considerações Finais</p>
         <h2>Contribuições</h2>
         <div class="grid2" style="margin-top:0.3em">
-          <div class="card"><h3>Detecção medida sobre todos os vulneráveis</h3><p class="sub">Rotular antes de executar o analisador permite medir o que ele deixa passar, número que bases montadas a partir dos alertas não produzem.</p></div>
-          <div class="card"><h3>Imprecisão do rótulo por arquivo em Go</h3><p class="sub">226 casos lidos · em 25,4% (CWE-22) e 48,2% (CWE-918) o arquivo rotulado não tem a operação perigosa.</p></div>
-          <div class="card"><h3>O peso da mensagem do alerta</h3><p class="sub">Sem ela, o <em>baseline</em> vai de 8 a 0 acertos, e a auditoria acha justificativas que a repetem · deve ser tratada como variável do experimento.</p></div>
-          <div class="card"><h3>Esteira e dados abertos</h3><p class="sub">Código, base, <em>prompts</em>, fichas e registros das execuções em <code>github.com/DiegoSousaLeite/tcc-arquitetura-hibrida-go</code>.</p></div>
+          <div class="card"><h3>Detecção medida sobre todos os vulneráveis</h3><p class="sub">Como o gabarito foi montado antes de rodar o Semgrep, deu para medir o que ele deixa passar. Bases feitas de alertas, como a do ZeroFalse, não têm esse número.</p></div>
+          <div class="card"><h3>O arquivo marcado nem sempre tem a falha</h3><p class="sub">Lendo 226 casos, medimos que em 25,4% <span style="white-space:nowrap">(CWE-22)</span> e 48,2% <span style="white-space:nowrap">(CWE-918)</span> o arquivo marcado não tem a operação perigosa. O efeito era conhecido, e aqui foi medido para Go.</p></div>
+          <div class="card"><h3>O peso da mensagem do alerta</h3><p class="sub">O modelo se apoia mais na mensagem do Semgrep do que no código. Sem ela, o <em>baseline</em> caiu de 8 para 0 acertos nos 19 vulneráveis. Quem avaliar modelos deve tratá-la como variável.</p></div>
+          <div class="card"><h3>Esteira e dados abertos</h3><p class="sub">Código, base, <em>prompts</em>, fichas e registros das execuções, para reproduzir e estender o experimento, em <code>github.com/DiegoSousaLeite/tcc-arquitetura-hibrida-go</code>.</p></div>
         </div>
       </section>
 
