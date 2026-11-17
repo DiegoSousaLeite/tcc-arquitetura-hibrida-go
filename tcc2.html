@@ -789,13 +789,13 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <div class="cols" style="margin-top:0.3em">
           <div class="card laranja">
             <h3 style="color:var(--orange)">1 · O analisador detecta pouco</h3>
-            <p class="sub">O Semgrep alerta só <b>2,4%</b> dos vulneráveis, e as quatro hipóteses testadas foram rejeitadas. O que mais pesa é o <b>gabarito</b>, que marca o arquivo da correção, e esse arquivo às vezes nem tem a operação perigosa.</p>
-            <p class="sub" style="margin-top:0.5em">Isso afetou o próprio experimento. Só 19 vulneráveis chegaram ao modelo no filtro, e por isso criamos o modo de triagem.</p>
+            <p class="sub">Só <b>2,4%</b> dos vulneráveis geram alerta, e a maior causa é o <b>gabarito</b>, que às vezes marca o arquivo errado.</p>
+            <p class="sub" style="margin-top:0.5em">Com isso, só 19 vulneráveis chegaram ao modelo no filtro.</p>
           </div>
           <div class="card vermelho">
             <h3 style="color:var(--crit-text)">2 · O modelo não separa o verdadeiro do falso</h3>
-            <p class="sub">Mesmo nos 19 detectados, <b>nenhuma configuração</b> mantém a maioria sem manter dezenas ou centenas de alarmes falsos.</p>
-            <p class="sub" style="margin-top:0.5em">Trocar o <em>prompt</em>, a pergunta ou o modelo <b>só muda a facilidade de responder "vulnerável"</b>. A única melhora, modesta, veio do comercial com raciocínio e o especialista.</p>
+            <p class="sub"><b>Nenhuma configuração</b> reconhece a maioria dos vulneráveis sem gerar dezenas ou centenas de alarmes falsos.</p>
+            <p class="sub" style="margin-top:0.5em">Trocar <em>prompt</em>, pergunta ou modelo só muda a facilidade de responder "vulnerável".</p>
           </div>
         </div>
         <ul class="tight" style="margin-top:0.8em">
