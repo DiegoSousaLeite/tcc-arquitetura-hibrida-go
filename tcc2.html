@@ -808,13 +808,15 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
       <section>
         <p class="kicker">Considerações Finais</p>
         <h2>Limitações</h2>
-        <ul class="tight" style="font-size:0.9em">
-          <li><b>19 vulneráveis no modo de filtro</b> <span class="gloss">— <em>recall</em> e MCC só dão a ordem de grandeza</span></li>
-          <li><b>Gabarito aproximado</b> <span class="gloss">— rótulo por arquivo e classe negativa que nem sempre se decide pela função</span></li>
-          <li><b>A CWE vem do gabarito</b> <span class="gloss">— os números do modo de triagem são otimistas</span></li>
-          <li><b>Auditoria da Q4</b> <span class="gloss">— não cega, sem concordância entre classificadores, 25 casos</span></li>
-          <li><b>Escopo de modelos</b> <span class="gloss">— locais quantizados em 4 bits e um único comercial, de faixa econômica</span></li>
-          <li><b>Só Go, e concorrência sem instrumento</b> <span class="gloss">— nenhuma ferramenta dinâmica foi usada</span></li>
+        <ul class="tight" style="font-size:0.84em">
+          <li><b>Só 19 vulneráveis no filtro</b> <span class="gloss">— cada caso vale mais de 5 pontos de <em>recall</em>, e a base OSV de Go já tinha sido varrida inteira</span></li>
+          <li><b>Gabarito aproximado</b> <span class="gloss">— às vezes marca o arquivo errado, e parte dos alertas seguros não se decide só pela função</span></li>
+          <li><b>A CWE vem do gabarito</b> <span class="gloss">— o especialista recebe a CWE certa, que na triagem nenhum alerta daria, e por isso esses números são otimistas</span></li>
+          <li><b>Auditoria da Q4</b> <span class="gloss">— classificação não cega, sem um segundo classificador independente, e só 25 casos</span></li>
+          <li><b>Escopo de modelos</b> <span class="gloss">— locais comprimidos em 4 bits e um único comercial, de faixa econômica e sem semente fixa</span></li>
+          <li><b>Só Go</b> <span class="gloss">— os resultados não se estendem automaticamente a outras linguagens</span></li>
+          <li><b>Concorrência sem instrumento</b> <span class="gloss">— o Semgrep não detectou nenhum caso, e nenhuma ferramenta dinâmica foi usada</span></li>
+          <li><b>Reprodutibilidade</b> <span class="gloss">— reexecutadas, as Rodadas 4 e 6 se repetiram, e a 5 manteve a direção, mas perdeu a significância</span></li>
         </ul>
       </section>
 
