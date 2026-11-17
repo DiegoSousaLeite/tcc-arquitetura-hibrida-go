@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="vendor/reveal/reveal.css">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="css/tema.css">
-  <link rel="stylesheet" href="css/tcc2.css?v=20261111f">
+  <link rel="stylesheet" href="css/tcc2.css?v=20261117b">
 </head>
 <body>
   <div class="reveal">
@@ -774,11 +774,11 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <p class="kicker">Considerações Finais</p>
         <h2>Respostas às questões de pesquisa</h2>
         <ul class="resp">
-          <li><span class="q">Geral</span><span class="curta">Sim, como filtro</span><span class="det">827 → 15 alertas, TRA de 98,2% a 98,7% em quatro rodadas · mas 16 dos 19 verdadeiros vão junto</span></li>
-          <li><span class="q">Q1</span><span class="curta">Depende do modelo</span><span class="det">ajuda o qwen2.5-coder:7b, atrapalha o gemma2:9b, instável no comercial · o <em>baseline</em> lia a fraqueza no alerta</span></li>
-          <li><span class="q">Q2</span><span class="curta">Reduz FP, mas introduz FN</span><span class="det">locais descartam mais da metade dos vulneráveis que recebem e recuperam 4–7% dos não detectados · comercial até 39%</span></li>
-          <li><span class="q">Q3</span><span class="curta">Parcial</span><span class="det">quem decide por categoria é o analisador · concorrência não mensurável, 0 de 11 casos detectados</span></li>
-          <li><span class="q">Q4</span><span class="curta">Influencia, nem sempre bem</span><span class="det">segue a heurística quando ela se aplica · senão copia o exemplo ou repete o alerta · 6 de 50 justificativas fundadas</span></li>
+          <li><span class="q">Geral</span><span class="curta">Como filtro, sim<span class="lembra">reduzir a fadiga de alertas</span></span><span class="det">O <code>qwen2.5-coder:7b</code> com o especialista reduz a pilha de 827 para 15 alertas, com TRA de 98,2% a 98,7% em quatro rodadas · mas descarta junto 16 dos 19 alertas verdadeiros</span></li>
+          <li><span class="q">Q1</span><span class="curta">Depende do modelo<span class="lembra">efeito da ficha</span></span><span class="det">A ficha ajuda o <code>qwen2.5-coder:7b</code>, atrapalha o <code>gemma2:9b</code> e não dá diferença estável no <code>gpt-6-luna</code> · o <em>baseline</em> lia a fraqueza na mensagem do alerta, então a vantagem da ficha tende a ser maior que a medida</span></li>
+          <li><span class="q">Q2</span><span class="curta">Reduz FP, mas introduz FN<span class="lembra">FP e FN</span></span><span class="det">No filtro, os locais descartam mais da metade dos vulneráveis que recebem · na triagem, recuperam de 4% a 7% dos que o Semgrep perdeu, e o <code>gpt-6-luna</code> com raciocínio chega a 39%</span></li>
+          <li><span class="q">Q3</span><span class="curta">Parcial<span class="lembra">fraquezas de Go</span></span><span class="det">Quem decide por categoria é o analisador, que detecta o que cabe numa linha, como injeção de SQL&nbsp;· concorrência não pôde ser medida, porque nenhum dos 11 casos foi detectado</span></li>
+          <li><span class="q">Q4</span><span class="curta">Influencia, nem sempre para melhor<span class="lembra">raciocínio do modelo</span></span><span class="det">Quando o critério da ficha se aplica, o modelo o segue · quando não se aplica, copia o exemplo ou repete a mensagem do alerta · só 6 de 50 justificativas se apoiam no código</span></li>
         </ul>
       </section>
 
