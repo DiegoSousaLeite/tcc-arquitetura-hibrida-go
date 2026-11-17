@@ -742,7 +742,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <div style="flex:1">
             <div class="card" style="margin-bottom:10px">
               <h3>O OpenVuln, base do ZeroFalse, marca o <b>alerta</b></h3>
-              <p class="sub">Os autores rodam o CodeQL no código antes da correção e marcam cada alerta como verdadeiro ou falso. A vulnerabilidade que não gera alerta fica de fora. No <code>keycloak</code>, o CodeQL não achou a falha e gerou 19 alertas falsos. Os 19 alertas entraram na base, e a falha <b>ficou fora da conta</b></p>
+              <p class="sub">Cada alerta do CodeQL é marcado como verdadeiro ou falso, e a vulnerabilidade sem alerta <b>fica de fora</b>. No <code>keycloak</code>, o CodeQL não achou a falha, e só os 19 alertas falsos entraram na base</p>
             </div>
             <div class="card azul">
               <h3 style="color:var(--blue-deep)">Este trabalho marca o <b>arquivo</b>, antes do Semgrep</h3>
