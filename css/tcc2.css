@@ -13,7 +13,7 @@
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .grid3 .card, .grid2 .card { padding: 12px 16px; }
-.card h3 { font-size: 0.72em; margin-bottom: 0.25em; }
+.card h3 { font-size: 0.72em; margin-bottom: 0.25em; color: var(--ink); }
 .card .sub { font-size: 0.62em; line-height: 1.4; margin: 0; }
 .card.azul { border-color: var(--blue); background: var(--blue-tint); }
 .card.laranja { border-color: var(--orange); background: var(--orange-tint); }
