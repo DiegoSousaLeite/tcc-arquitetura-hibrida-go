@@ -134,6 +134,11 @@
 .resp .q { flex: 0 0 auto; font-weight: 800; color: var(--blue-deep); background: var(--blue-tint); border-radius: 8px; padding: 1px 10px; min-width: 2.6em; text-align: center; }
 .resp .curta { flex: 0 0 23%; font-weight: 750; }
 .resp .det code { white-space: nowrap; }
+.resp.comperg li { display: grid; grid-template-columns: 3.6em 22% 1fr; column-gap: 14px; row-gap: 2px; align-items: baseline; padding: 6px 4px; }
+.resp.comperg .q { grid-column: 1; grid-row: 1; min-width: 0; padding: 1px 0; }
+.resp.comperg .perg { grid-column: 2 / -1; grid-row: 1; color: var(--muted); font-size: 0.86em; font-style: italic; }
+.resp.comperg .curta { grid-column: 2; grid-row: 2; }
+.resp.comperg .det { grid-column: 3; grid-row: 2; }
 .resp .det { flex: 1; color: var(--ink-2); font-size: 0.92em; line-height: 1.38; }
 .resp .lembra { display: block; font-weight: 400; font-size: 0.74em; color: var(--muted); margin-top: 2px; }
 
