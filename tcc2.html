@@ -840,7 +840,7 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <li><b>O modelo antes do analisador</b> <span class="gloss">— usar o modelo para achar, em cada projeto, as funções que recebem entrada, manipulam caminhos ou sanitizam dados, e transformá-las em regras do Semgrep, como fazem o IRIS e o MEMHINT</span></li>
           <li><b>Concorrência com análise dinâmica</b> <span class="gloss">— combinar a triagem com o detector de corrida do próprio Go, para medir o que este trabalho não conseguiu</span></li>
           <li><b>Rodar o <em>gosec</em> à parte</b> <span class="gloss">— o analisador próprio de Go tem regras para caminho de arquivo (G304) e URL variável (G107), que o <code>p/gosec</code> do Semgrep não traz, e não foi executado aqui</span></li>
-          <li><b>Gabarito mais preciso</b> <span class="gloss">— marcar a função ou a linha da operação perigosa, e não o arquivo, para separar o que o analisador perde do que é erro do gabarito</span></li>
+          <li><b>Gabarito mais preciso</b> <span class="gloss">— marcar onde está a operação perigosa, e não o que a correção alterou, para separar o que o analisador perde do que é erro do gabarito</span></li>
           <li><b>Modelos de topo de linha</b> <span class="gloss">— verificar se os dois limites persistem</span></li>
         </ul>
         <div class="hl" style="margin-top:0.8em">Pôr o modelo <b>antes</b> do analisador é <b>a única posição em que ele poderia aumentar a detecção</b>.</div>
