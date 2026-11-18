@@ -870,9 +870,10 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <tr class="formula-row"><td><b>Precisão · <em>Recall</em> · TFN</b></td><td>\(P = \dfrac{VP}{VP + FP}\qquad R = \dfrac{VP}{VP + FN}\qquad \mathrm{TFN} = 1 - R\)</td></tr>
           <tr class="formula-row"><td><b>MCC</b></td><td>\(\mathrm{MCC} = \dfrac{VP \cdot VN - FP \cdot FN}{\sqrt{\scriptstyle(VP{+}FP)(VP{+}FN)(VN{+}FP)(VN{+}FN)}}\)</td></tr>
           <tr class="formula-row"><td><b>McNemar</b></td><td>\(\chi^2 = \dfrac{(|b - c| - 1)^2}{b + c}\) <span class="sub">— b e c são os casos em que só um dos <em>prompts</em> acerta</span></td></tr>
-          <tr class="formula-row"><td><b>J de Youden</b></td><td>\(J = R_{\text{injetados}} - \text{alarme}_{\text{seguros}}\) <span class="sub">— 0 é o acaso, 1 é perfeito</span></td></tr>
+          <tr class="formula-row"><td><b>J de Youden</b></td><td>\(J = \dfrac{VP}{VP + FN} - \dfrac{FP}{FP + VN}\) <span class="sub">— <em>recall</em> nos injetados menos alarme nos seguros · 0 é o acaso, 1 é perfeito</span></td></tr>
         </table>
-        <p class="sub">O MCC usa as quatro células e não engana com 2,3% de vulneráveis. O McNemar usa todos os casos pareados, e não só os 19 vulneráveis.</p>
+        <p class="mini-nota" style="margin-top:0.5em"><b>VP</b> = vulnerável mantido · <b>FN</b> = vulnerável descartado · <b>FP</b> = seguro mantido · <b>VN</b> = seguro descartado</p>
+        <p class="mini-nota" style="font-size:0.56em; line-height:1.45; color:var(--ink-2); margin-top:0.4em">O MCC usa os quatro números e não engana quando só 2,3% dos casos são vulneráveis. O McNemar compara os dois <em>prompts</em> caso a caso, em todos os alertas, e conta só os casos em que eles discordam. Com menos de 25 discordâncias, usa o teste binomial exato. Abaixo de <i>p</i> = 0,05, a diferença é significativa.</p>
       </section>
 
       <!-- ============ BACKUP 3: H2 E H4 ============ -->
@@ -945,6 +946,9 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <p class="kicker">Apoio</p>
         <h2>Referências principais</h2>
         <div class="refs">
+          <p><b>Youden, W. J.</b> Index for Rating Diagnostic Tests. <em>Cancer</em>, 1950.</p>
+          <p><b>Dietterich, T. G.</b> Approximate Statistical Tests for Comparing Supervised Classification Learning Algorithms. <em>Neural Computation</em>, 1998.</p>
+          <p><b>Wohlin, C. et al.</b> Experimentation in Software Engineering. Springer, 2012.</p>
           <p><b>Johnson, B. et al.</b> Why don't software developers use static analysis tools to find bugs? <em>ICSE</em>, 2013.</p>
           <p><b>Tu, T. et al.</b> Understanding real-world concurrency bugs in Go. <em>ASPLOS</em>, 2019.</p>
           <p><b>Pearce, H. et al.</b> Asleep at the Keyboard? Assessing the Security of GitHub Copilot's Code Contributions. <em>IEEE S&amp;P</em>, 2022.</p>
@@ -956,7 +960,6 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
           <p><b>Feiglin, J.; Dar, G.</b> SastBench: A Benchmark for Testing Agentic SAST Triage. 2026.</p>
           <p><b>Huang, H. et al.</b> Finding Memory Leaks in C/C++ Programs via Neuro-Symbolic Augmented Static Analysis. 2026.</p>
           <p><b>Wang, J. et al.</b> Bridging Coverage and Confidence: Reliable Static False Alarm Elimination via Input-Agnosticity. <em>PACMPL</em>, 2026.</p>
-          <p><b>Youden, W. J.</b> Index for Rating Diagnostic Tests. <em>Cancer</em>, 1950.</p>
         </div>
       </section>
 
