@@ -882,24 +882,61 @@ func (o *OIDC) HandleLogin(rw http.ResponseWriter, ...) {
         <h2>Detalhes das hipóteses H2 e H4</h2>
         <div class="cols">
           <div class="card">
-            <h3>H2 · fluxo entre arquivos</h3>
-            <ul class="tight" style="font-size:0.66em">
-              <li><b>Semgrep Pro</b> — 5 casos com resultado, 0 novos · 2 a 5 vezes mais lento · 1 caso passou de 900 s</li>
-              <li><b>CodeQL</b> — 81 casos, 47 arquivos de 14 repositórios · 2 de 8 na CWE-22 e 1 de 29 na CWE-918</li>
-              <li><b>SonarQube</b> comunitário — sem regra de segurança para Go</li>
-              <li>44 de 47 arquivos <b>sem detecção nas três ferramentas</b></li>
+            <h3>H2 · Faltava análise entre arquivos</h3>
+            <ul class="tight" style="font-size:0.6em">
+              <li><b>Semgrep Pro</b> — 5 casos, escolhidos em intervalos regulares, sem detecção nova. Nem alertou o arquivo marcado, então falta regra, e não alcance. Um sexto caso passou de 900 s</li>
+              <li><b>CodeQL</b> — 81 casos, 47 arquivos de 14 repositórios pequenos. Recuperou 3 arquivos, 2 de 8 na <span style="white-space:nowrap">CWE-22</span> e 1 de 29 na <span style="white-space:nowrap">CWE-918</span></li>
+              <li><b>SonarQube comunitário</b> — sem regra de segurança para Go</li>
+              <li><b>Amostras diferentes</b> — o CodeQL monta uma base por repositório e avalia todos os casos dele de uma vez, e o Pro reanalisava o repositório inteiro a cada caso</li>
+              <li><b>Leitura</b> — 44 dos 47 arquivos seguiram sem detecção nas três ferramentas. A análise entre arquivos explica pouco</li>
             </ul>
           </div>
           <div class="card">
-            <h3>H4 · regras próprias</h3>
-            <ul class="tight" style="font-size:0.66em">
-              <li><b>Partição antes da primeira regra</b> — <em>commit</em> <code>18ce326</code>, grupos de desenvolvimento e de avaliação</li>
-              <li><b>Derivadas da definição</b> — 2 de 114 (CWE-22) e 1 de 112 (CWE-918)</li>
-              <li><b>Avaliação, todas as regras</b> — 4 de 60 e 1 de 57</li>
-              <li><b>Desenvolvimento</b> — 7,4% e 5,5% · na CWE-918 a regra descreve mais os casos vistos do que a fraqueza</li>
+            <h3>H4 · Faltava regra própria</h3>
+            <ul class="tight" style="font-size:0.6em">
+              <li><b>Antes das regras</b> — os 226 casos foram divididos em desenvolvimento (109) e avaliação (117), num <em>commit</em> anterior à primeira regra (<code>18ce326</code>)</li>
+              <li><b>Só da definição da CWE</b> — 2 de 114 <span style="white-space:nowrap">(CWE-22)</span> e 1 de 112 <span style="white-space:nowrap">(CWE-918)</span></li>
+              <li><b>Todas as regras, na avaliação</b> — 4 de 60 (6,7%) e 1 de 57 (1,8%)</li>
+              <li><b>No desenvolvimento</b> — 7,4% e 5,5%. Na <span style="white-space:nowrap">CWE-918</span>, a regra descreve mais os casos vistos do que a fraqueza</li>
+              <li><b>Leitura</b> — regra própria melhora pouco, e na <span style="white-space:nowrap">CWE-918</span> um caso a mais já dobraria a taxa</li>
             </ul>
           </div>
         </div>
+      </section>
+
+      <!-- ============ BACKUP: CONCORRÊNCIA NA TRIAGEM ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Q3</p>
+        <h2>Concorrência: o que o modelo viu na triagem</h2>
+        <p class="sub">Os 11 casos de condição de corrida <span style="white-space:nowrap">(CWE-362)</span> não geraram alerta e, no filtro, nunca chegam ao modelo. Na triagem, eles chegam</p>
+        <table class="compacta" style="margin-top:0.5em">
+          <tr><th>Quem avaliou</th><th class="num">Reconheceu como vulnerável</th></tr>
+          <tr><td>Semgrep</td><td class="num">0 de 11</td></tr>
+          <tr><td><code>qwen2.5-coder:7b</code>, especialista</td><td class="num">2 de 11</td></tr>
+          <tr><td><code>gemma2:9b</code>, especialista</td><td class="num">0 de 8 (3 sem veredito)</td></tr>
+          <tr><td><code>gpt-6-luna</code>, sem raciocínio</td><td class="num">1 e 0 (duas execuções)</td></tr>
+          <tr class="destaque"><td><code>gpt-6-luna</code>, com raciocínio</td><td class="num">6 e 8 (esforço baixo e alto)</td></tr>
+        </table>
+        <div class="hl" style="margin-top:0.7em; font-size:0.7em; line-height:1.45"><b>Por que não conclui nada:</b> são só 11 casos, e a versão corrigida desses arquivos não foi avaliada. Sem ela, não dá para separar o reconhecimento da falha da tendência a responder "vulnerável".</div>
+      </section>
+
+      <!-- ============ BACKUP: REPRODUTIBILIDADE ============ -->
+      <section>
+        <span class="backup-badge">BACKUP</span>
+        <p class="kicker">Apoio · Limitações</p>
+        <h2>Reprodutibilidade das Rodadas 4 a 6</h2>
+        <p class="sub">As três rodadas foram executadas de novo, com a mesma configuração, semente fixa e temperatura zero. Os vereditos não foram exatamente iguais</p>
+        <table class="compacta" style="margin-top:0.5em">
+          <tr><th>Rodada 5 · <code>qwen2.5-coder:7b</code>, triagem, pergunta direta</th><th class="num">1ª execução</th><th class="num">2ª execução</th></tr>
+          <tr><td><em>Recall</em> do especialista nos casos sem alerta</td><td class="num">4,47%</td><td class="num">4,49%</td></tr>
+          <tr><td>Acertos do especialista nos 19 com alerta</td><td class="num">6</td><td class="num">4</td></tr>
+          <tr class="destaque"><td>McNemar · só o especialista acerta × só o <em>baseline</em> acerta</td><td class="num">63 × 36 · <i>p</i> = 0,009</td><td class="num">58 × 40 · <i>p</i> = 0,086</td></tr>
+        </table>
+        <ul class="tight" style="margin-top:0.6em; font-size:0.8em">
+          <li><b>Rodadas 4 e 6</b> <span class="gloss">— se repetiram, inclusive no teste de McNemar</span></li>
+          <li><b>Rodada 5</b> <span class="gloss">— a direção se manteve, mas a vantagem do especialista deixou de ser significativa. Bastaram poucos casos</span></li>
+        </ul>
       </section>
 
       <!-- ============ BACKUP: REFERÊNCIAS ============ -->
